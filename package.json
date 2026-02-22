@@ -1,23 +1,22 @@
 {
-  "name": "@quartz-community/plugin-template",
+  "name": "@quartz-community/bases-page",
   "version": "0.1.0",
-  "description": "Template repository for Quartz community plugins.",
+  "description": "Obsidian Bases page type plugin for Quartz v5. Renders database-like filtered views of notes from .base files.",
   "type": "module",
   "license": "MIT",
   "author": "Quartz Community",
   "homepage": "https://quartz.jzhao.xyz",
   "repository": {
     "type": "git",
-    "url": "https://github.com/quartz-community/plugin-template"
+    "url": "https://github.com/quartz-community/bases-page"
   },
   "keywords": [
     "quartz",
     "quartz-plugin",
-    "plugin-template",
-    "remark",
-    "rehype",
-    "mdast",
-    "hast"
+    "obsidian",
+    "bases",
+    "database",
+    "page-type"
   ],
   "files": [
     "dist",
@@ -54,7 +53,7 @@
     "check": "npm run typecheck && npm run lint && npm run format && npm run test"
   },
   "peerDependencies": {
-    "@jackyzha0/quartz": "^4.5.2",
+    "@jackyzha0/quartz": "^5.0.0",
     "preact": "^10.0.0"
   },
   "peerDependenciesMeta": {
@@ -67,14 +66,8 @@
   },
   "dependencies": {
     "@quartz-community/types": "github:quartz-community/types",
-    "mdast-util-find-and-replace": "^3.0.1",
-    "rehype-slug": "^6.0.0",
-    "remark-gfm": "^4.0.1",
-    "remark-parse": "^11.0.0",
-    "remark-stringify": "^11.0.0",
-    "unified": "^11.0.5",
-    "unist-util-visit": "^5.0.0",
-    "vfile": "^6.0.3"
+    "vfile": "^6.0.3",
+    "yaml": "^2.8.1"
   },
   "devDependencies": {
     "@types/hast": "^3.0.4",
@@ -91,22 +84,18 @@
     "vitest": "^2.1.9"
   },
   "quartz": {
-    "name": "plugin-template",
-    "displayName": "Plugin Template",
-    "category": "transformer",
+    "name": "bases-page",
+    "displayName": "Bases Page",
+    "category": [
+      "pageType",
+      "component"
+    ],
     "version": "1.0.0",
     "quartzVersion": ">=5.0.0",
     "dependencies": [],
     "defaultOrder": 50,
     "defaultEnabled": true,
-    "defaultOptions": {},
-    "components": {
-      "ExampleComponent": {
-        "displayName": "Example Component",
-        "defaultPosition": "right",
-        "defaultPriority": 50
-      }
-    }
+    "defaultOptions": {}
   },
   "engines": {
     "node": ">=22",

@@ -1,62 +1,104 @@
+// Re-export needed types from @quartz-community/types
 export type {
   BuildCtx,
-  ChangeEvent,
-  CSSResource,
-  JSResource,
+  FullSlug,
+  FilePath,
   ProcessedContent,
-  QuartzEmitterPlugin,
-  QuartzEmitterPluginInstance,
-  QuartzFilterPlugin,
-  QuartzFilterPluginInstance,
   QuartzPluginData,
-  QuartzTransformerPlugin,
-  QuartzTransformerPluginInstance,
-  StaticResources,
   PageMatcher,
   PageGenerator,
   VirtualPage,
   QuartzPageTypePlugin,
   QuartzPageTypePluginInstance,
+  QuartzComponent,
+  QuartzComponentProps,
+  QuartzComponentConstructor,
+  GlobalConfiguration,
 } from "@quartz-community/types";
 
-export interface ExampleTransformerOptions {
-  /** Token used to highlight text, defaults to ==highlight== */
-  highlightToken: string;
-  /** Add a CSS class to all headings in the rendered HTML. */
-  headingClass: string;
-  /** Enable remark-gfm for tables/task lists. */
-  enableGfm: boolean;
-  /** Enable adding slug IDs to headings. */
-  addHeadingSlugs: boolean;
+// === Bases Types ===
+
+/** Plugin options */
+export interface BasesPageOptions {
+  /** Default view type when none specified. Default: "table" */
+  defaultViewType?: string;
 }
 
-export interface ExampleFilterOptions {
-  /** Allow pages marked draft: true to publish. */
-  allowDrafts: boolean;
-  /** Exclude pages that contain any of these frontmatter tags. */
-  excludeTags: string[];
-  /** Exclude paths that start with any of these prefixes (relative to content root). */
-  excludePathPrefixes: string[];
+/** Sort direction */
+export type SortDirection = "ASC" | "DESC";
+
+/** Filter tree node — recursive and/or/not structure */
+export type FilterNode =
+  | string
+  | { and: FilterNode[] }
+  | { or: FilterNode[] }
+  | { not: FilterNode[] };
+
+/** Group-by configuration */
+export interface GroupBy {
+  property: string;
+  direction?: SortDirection;
 }
 
-export interface ExampleEmitterOptions {
-  /** Filename to emit at the site root. */
-  manifestSlug: string;
-  /** Whether to include the frontmatter block in the manifest. */
-  includeFrontmatter: boolean;
-  /** Extra metadata to write at the top level of the manifest. */
-  metadata: Record<string, unknown>;
-  /** Optional hook to transform the emitted manifest JSON string. */
-  transformManifest?: (json: string) => string;
-  /** Add a custom class to the emitted manifest <script> tag if used in HTML. */
-  manifestScriptClass?: string;
+/** Summary configuration per property */
+export type SummaryType =
+  | "Average"
+  | "Min"
+  | "Max"
+  | "Sum"
+  | "Range"
+  | "Median"
+  | "Stddev"
+  | "Earliest"
+  | "Latest"
+  | "Checked"
+  | "Unchecked"
+  | "Empty"
+  | "Filled"
+  | "Unique"
+  | string;
+
+/** Property display configuration */
+export interface PropertyConfig {
+  displayName?: string;
 }
 
-export interface ExampleComponentOptions {
-  /** Text to prefix before the title */
-  prefix?: string;
-  /** Text to suffix after the title */
-  suffix?: string;
-  /** CSS class name to apply */
-  className?: string;
+/** View definition */
+export interface BasesView {
+  type: string;
+  name?: string;
+  limit?: number;
+  groupBy?: GroupBy;
+  filters?: FilterNode;
+  order?: string[];
+  summaries?: Record<string, SummaryType>;
+  [key: string]: unknown;
+}
+
+/** Top-level .base file structure */
+export interface BasesData {
+  filters?: FilterNode;
+  formulas?: Record<string, string>;
+  properties?: Record<string, PropertyConfig>;
+  summaries?: Record<string, string>;
+  views?: BasesView[];
+}
+
+/** Resolved entry — a note that matches the base query */
+export interface BasesEntry {
+  slug: string;
+  title: string;
+  /** All frontmatter properties */
+  properties: Record<string, unknown>;
+  /** File metadata properties */
+  fileProperties: {
+    name: string;
+    path: string;
+    folder: string;
+    ext: string;
+    tags: string[];
+    links: string[];
+  };
+  /** Computed formula values */
+  formulaValues: Record<string, unknown>;
 }

@@ -1,25 +1,20 @@
-export { ExampleTransformer } from "./transformer";
-export { ExampleFilter } from "./filter";
-export { ExampleEmitter } from "./emitter";
-export { default as ExampleComponent } from "./components/ExampleComponent";
-
+export { BasesPage } from "./pageType";
+export { default as BasesBody } from "./components/BasesBody";
 export type {
-  ExampleTransformerOptions,
-  ExampleFilterOptions,
-  ExampleEmitterOptions,
+  BasesPageOptions,
+  BasesData,
+  BasesView,
+  BasesEntry,
+  FilterNode,
+  GroupBy,
+  SummaryType,
+  PropertyConfig,
+  SortDirection,
 } from "./types";
-
-export type { ExampleComponentOptions } from "./components/ExampleComponent";
-
-// Re-export shared types from @quartz-community/types
 export type {
   QuartzComponent,
   QuartzComponentProps,
   QuartzComponentConstructor,
-  StringResource,
-  QuartzTransformerPlugin,
-  QuartzFilterPlugin,
-  QuartzEmitterPlugin,
   QuartzPageTypePlugin,
   QuartzPageTypePluginInstance,
   PageMatcher,

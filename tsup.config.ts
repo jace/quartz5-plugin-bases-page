@@ -21,12 +21,13 @@ const inlineScriptPlugin: Plugin = {
   setup(parentBuild) {
     const absWorkingDir = parentBuild.initialOptions.absWorkingDir ?? process.cwd();
 
-    // SCSS files are loaded as raw text (CSS injected via style tags)
+    // SCSS files are compiled to CSS via the sass package, then embedded as text.
+    // This mirrors Quartz v5 core's sassPlugin({ type: "css-text" }) behavior.
     parentBuild.onLoad({ filter: /\.scss$/ }, async (args) => {
-      const fs = await import("fs");
-      const text = await fs.promises.readFile(args.path, "utf8");
+      const sass = await import("sass");
+      const result = sass.compile(args.path);
       return {
-        contents: text,
+        contents: result.css,
         loader: "text",
       };
     });

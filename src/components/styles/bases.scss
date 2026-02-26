@@ -226,3 +226,126 @@ th.is-sorted-desc .bases-sort-indicator {
   border-radius: 12px;
   background: var(--light);
 }
+
+// Gallery view
+.bases-gallery {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.bases-gallery-item {
+  position: relative;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--lightgray);
+  background: var(--light);
+}
+
+.bases-gallery-image {
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: var(--lightgray);
+}
+
+.bases-gallery-image img,
+.bases-gallery-placeholder {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.bases-gallery-placeholder {
+  background: linear-gradient(135deg, var(--lightgray), var(--highlight));
+}
+
+.bases-gallery-title {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 10px 12px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, rgba(0, 0, 0, 0.65) 100%);
+  color: var(--light);
+  font-weight: 600;
+}
+
+.bases-gallery-title a {
+  color: inherit;
+}
+
+// Board/Kanban view
+.bases-board {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+}
+
+.bases-board-column {
+  min-width: 250px;
+  flex-shrink: 0;
+  border: 1px solid var(--lightgray);
+  border-radius: 12px;
+  background: var(--light);
+  display: flex;
+  flex-direction: column;
+}
+
+.bases-board-column-header {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  font-weight: 600;
+  background: var(--light);
+  border-bottom: 1px solid var(--lightgray);
+  z-index: 1;
+}
+
+.bases-board-count {
+  background: var(--lightgray);
+  color: var(--darkgray);
+  border-radius: 999px;
+  padding: 2px 8px;
+  font-size: 0.75rem;
+}
+
+.bases-board-column-body {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bases-board-card {
+  border: 1px solid var(--lightgray);
+  border-radius: 10px;
+  background: var(--light);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
+}
+
+.bases-board-card-meta {
+  display: grid;
+  gap: 4px;
+  font-size: 0.8rem;
+  color: var(--darkgray);
+}
+
+.bases-board-card-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.bases-board-card-label {
+  color: var(--gray);
+}

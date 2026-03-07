@@ -1,6 +1,17 @@
 import type { ViewTypeRegistration, ViewRenderer } from "./types";
 
 /**
+ * Symbol key for the global ViewRegistry singleton.
+ *
+ * Using a well-known Symbol on `globalThis` guarantees that all copies of this
+ * module — whether loaded from different `node_modules` paths or from different
+ * tsup entry points — share the exact same registry instance. Without this,
+ * community plugins that bundle or install their own copy of bases-page would
+ * register views into a private registry that the main bases-page never sees.
+ */
+const REGISTRY_KEY = Symbol.for("@quartz-community/bases-page/viewRegistry");
+
+/**
  * Central registry for Bases view types.
  *
  * Built-in views (table, list, cards, gallery, board) are registered at plugin
@@ -53,12 +64,14 @@ class ViewRegistry {
 }
 
 /**
- * Singleton view registry instance.
+ * Singleton view registry instance, stored on `globalThis` via a well-known
+ * Symbol so that all copies of this module share the same instance.
  *
  * Community plugins import this to register custom view types.
  * Built-in views are registered by `registerBuiltinViews()` during plugin init.
  */
-export const viewRegistry = new ViewRegistry();
+const g = globalThis as unknown as Record<symbol, ViewRegistry>;
+export const viewRegistry: ViewRegistry = (g[REGISTRY_KEY] ??= new ViewRegistry());
 
 /**
  * Convenience: bulk-register views from a `customViews` config record.

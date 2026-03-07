@@ -42,6 +42,18 @@ export interface ViewTypeRegistration {
   icon?: string;
   /** The render function producing Preact JSX */
   render: ViewRenderer;
+  /**
+   * Optional CSS string injected once per page when this view type is active.
+   * Deduplicated by view type ID — only injected once even if multiple views
+   * of the same type appear on the page.
+   */
+  css?: string;
+  /**
+   * Optional client-side script injected once per page when this view type is
+   * active. Runs after the DOM is loaded, following the same lifecycle as
+   * `QuartzComponent.afterDOMLoaded`. Deduplicated by view type ID.
+   */
+  afterDOMLoaded?: string;
 }
 
 // === Plugin Options ===
@@ -140,20 +152,6 @@ export interface BasesView {
   dateField?: string;
   /** Alias for date */
   dateProperty?: string;
-
-  // -- Map specific --
-  /** Property path for coordinates [lat, lng] */
-  coordinates?: string;
-  /** Marker icon name */
-  markerIcon?: string;
-  /** Marker color */
-  markerColor?: string;
-  /** Default zoom level */
-  defaultZoom?: number;
-  /** Default center [lat, lng] */
-  defaultCenter?: [number, number];
-  /** Enable marker clustering */
-  clustering?: boolean;
 
   // -- Board specific --
   /** Property to group board columns by (if not using groupBy) */

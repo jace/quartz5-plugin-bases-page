@@ -46,8 +46,21 @@ export default ((opts?: BasesPageOptions) => {
       registerCustomViews(basesOptions.customViews);
     }
 
+    // Collect CSS and scripts from custom view registrations (deduplicated by type)
+    const activeTypes = new Set(views.map((v) => v.type));
+    const viewCssChunks: string[] = [];
+    const viewScriptChunks: string[] = [];
+    for (const typeId of activeTypes) {
+      const reg = viewRegistry.get(typeId);
+      if (reg?.css) viewCssChunks.push(reg.css);
+      if (reg?.afterDOMLoaded) viewScriptChunks.push(reg.afterDOMLoaded);
+    }
+
     return (
       <div class="bases-page" data-initial-view={initialIndex}>
+        {viewCssChunks.length > 0 && (
+          <style dangerouslySetInnerHTML={{ __html: viewCssChunks.join("\n") }} />
+        )}
         <ViewSelector views={views} activeIndex={initialIndex} locale={locale} />
         <div class="bases-view-container">
           {views.map((view, index) => {
@@ -77,6 +90,9 @@ export default ((opts?: BasesPageOptions) => {
             );
           })}
         </div>
+        {viewScriptChunks.length > 0 && (
+          <script dangerouslySetInnerHTML={{ __html: viewScriptChunks.join("\n") }} />
+        )}
       </div>
     );
   };

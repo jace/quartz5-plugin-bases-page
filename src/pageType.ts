@@ -7,6 +7,7 @@ import type {
 import { readFileSync } from "fs";
 import { join } from "path";
 import { parseBasesData } from "./parser";
+import { resolveBasesEntries } from "./resolver";
 import BasesBody from "./components/BasesBody";
 import type { BasesPageOptions } from "./types";
 
@@ -19,8 +20,9 @@ export const BasesPage: QuartzPageTypePlugin<BasesPageOptions> = (opts) => ({
   priority: 20,
   fileExtensions: [".base"],
   match: basesMatcher,
-  generate({ ctx }) {
+  generate({ content, ctx }) {
     const baseFiles = ctx.allFiles.filter((fp) => fp.endsWith(".base"));
+    const allFileData = content.map((c) => c[1].data);
     const virtualPages: VirtualPage[] = [];
 
     for (const filePath of baseFiles) {
@@ -43,6 +45,7 @@ export const BasesPage: QuartzPageTypePlugin<BasesPageOptions> = (opts) => ({
         title: baseName,
         data: {
           frontmatter: { title: baseName, tags: [] },
+          links: resolveBasesEntries(basesData, allFileData).entries.map((e) => e.slug),
           basesData,
           basesOptions: opts,
         },

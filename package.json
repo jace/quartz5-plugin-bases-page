@@ -75,8 +75,11 @@
   "dependencies": {
     "@quartz-community/types": "github:quartz-community/types",
     "@quartz-community/utils": "github:quartz-community/utils",
+    "hast-util-from-html": "^2.0.3",
+    "preact-render-to-string": "^6.6.6",
     "tsup": "^8.5.0",
     "typescript": "^5.9.3",
+    "unist-util-visit": "^5.1.0",
     "vfile": "^6.0.3",
     "yaml": "^2.8.1"
   },
@@ -97,6 +100,7 @@
     "name": "bases-page",
     "displayName": "Bases Page",
     "category": [
+      "transformer",
       "pageType",
       "component"
     ],

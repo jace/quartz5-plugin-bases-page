@@ -3,13 +3,25 @@ import type {
   PageMatcher,
   FullSlug,
   VirtualPage,
+  TreeTransform,
+  QuartzComponentProps,
 } from "@quartz-community/types";
+import type { Root as HtmlRoot, Element, ElementContent } from "hast";
+import { visit } from "unist-util-visit";
+import { render } from "preact-render-to-string";
+import { h, Fragment } from "preact";
+import { fromHtml } from "hast-util-from-html";
 import { readFileSync } from "fs";
 import { join } from "path";
 import { parseBasesData } from "./parser";
 import { resolveBasesEntries } from "./resolver";
 import BasesBody from "./components/BasesBody";
 import type { BasesPageOptions } from "./types";
+import type { BasesData } from "./types";
+import { registerBuiltinViews } from "./components/views";
+import { registerCustomViews, viewRegistry } from "./registry";
+import { i18n } from "./i18n";
+import { ViewSelector } from "./components/ViewSelector";
 
 const basesMatcher: PageMatcher = ({ fileData }) => {
   return "basesData" in fileData;
@@ -56,4 +68,126 @@ export const BasesPage: QuartzPageTypePlugin<BasesPageOptions> = (opts) => ({
   },
   layout: "bases",
   body: BasesBody,
+  treeTransforms(ctx) {
+    return [createBasesCodeblockTransform(opts)];
+  },
 });
+
+/**
+ * Creates a tree transform that resolves `data-qz-bases-codeblock` placeholder
+ * divs at render time, replacing them with fully rendered Bases views.
+ *
+ * This runs after transclusion in `renderPage()`, when `allFiles` is available.
+ */
+function createBasesCodeblockTransform(
+  opts: BasesPageOptions | undefined,
+): TreeTransform {
+  let builtinViewsRegistered = false;
+
+  return (root: HtmlRoot, _slug: FullSlug, componentData: QuartzComponentProps) => {
+    const fileData = componentData.fileData as Record<string, unknown>;
+    const basesBlocks = fileData.basesBlocks as BasesData[] | undefined;
+    if (!basesBlocks || basesBlocks.length === 0) return;
+
+    // Ensure built-in views are registered
+    if (!builtinViewsRegistered) {
+      registerBuiltinViews();
+      builtinViewsRegistered = true;
+    }
+    if (opts?.customViews) {
+      registerCustomViews(opts.customViews);
+    }
+
+    const locale = componentData.cfg?.locale ?? "en-US";
+    const localeStrings = i18n(locale).components.bases;
+    const allFiles = componentData.allFiles;
+
+    visit(root, "element", (node: Element, index, parent) => {
+      if (!parent || index === undefined) return;
+      const blockIndexStr = node.properties?.["dataQzBasesCodeblock"] as string | undefined;
+      if (blockIndexStr === undefined) return;
+
+      const blockIndex = Number(blockIndexStr);
+      const basesData = basesBlocks[blockIndex];
+      if (!basesData) return;
+
+      // Render the bases views inline — mirrors BasesBody.tsx logic
+      const htmlString = renderBasesInline(basesData, allFiles, locale, localeStrings, opts);
+      const fragment = fromHtml(htmlString, { fragment: true }) as HtmlRoot;
+
+      // Replace the placeholder node's children with the rendered content
+      node.tagName = "div";
+      node.properties = { class: "bases-page bases-inline" };
+      node.children = fragment.children as ElementContent[];
+    });
+  };
+}
+
+/**
+ * Render a BasesData block to an HTML string, replicating the core rendering
+ * logic of BasesBody.tsx but invoked at tree-transform time.
+ */
+function renderBasesInline(
+  basesData: BasesData,
+  allFiles: (Record<string, unknown>)[],
+  locale: string,
+  localeStrings: { noData: string; noViews: string },
+  opts: BasesPageOptions | undefined,
+): string {
+  const views = basesData.views ?? [];
+
+  if (views.length === 0) {
+    return `<div class="bases-empty">${localeStrings.noViews}</div>`;
+  }
+
+  const preferredType = opts?.defaultViewType ?? "table";
+  const initialIndex = Math.max(
+    0,
+    views.findIndex((view) => view.type === preferredType),
+  );
+
+  // Collect CSS and scripts from custom view registrations (deduplicated by type)
+  const activeTypes = new Set(views.map((v) => v.type));
+  const viewCssChunks: string[] = [];
+  const viewScriptChunks: string[] = [];
+  for (const typeId of activeTypes) {
+    const reg = viewRegistry.get(typeId);
+    if (reg?.css) viewCssChunks.push(reg.css);
+    if (reg?.afterDOMLoaded) viewScriptChunks.push(reg.afterDOMLoaded);
+  }
+
+  // Render the view selector
+  const selectorHtml = render(
+    h(Fragment, null, ViewSelector({ views, activeIndex: initialIndex, locale })),
+  );
+
+  // Render each view panel
+  const viewPanels = views.map((view, index) => {
+    const { entries, total } = resolveBasesEntries(basesData, allFiles, view);
+    const registration = viewRegistry.get(view.type);
+    const Renderer = registration?.render;
+    const activeClass = index === initialIndex ? " is-active" : "";
+
+    let innerHtml: string;
+    if (entries.length === 0) {
+      innerHtml = `<div class="bases-empty">${localeStrings.noData}</div>`;
+    } else if (Renderer) {
+      innerHtml = render(
+        h(Fragment, null, Renderer({ entries, view, basesData, total, locale })),
+      );
+    } else {
+      innerHtml = `<div class="bases-empty">Unknown view type: ${view.type}</div>`;
+    }
+
+    return `<div class="bases-view${activeClass}" data-view-index="${index}" data-view-type="${view.type}">${innerHtml}</div>`;
+  });
+
+  const cssBlock = viewCssChunks.length > 0
+    ? `<style>${viewCssChunks.join("\n")}</style>`
+    : "";
+  const scriptBlock = viewScriptChunks.length > 0
+    ? `<script>${viewScriptChunks.join("\n")}</script>`
+    : "";
+
+  return `${cssBlock}${selectorHtml}<div class="bases-view-container">${viewPanels.join("")}</div>${scriptBlock}`;
+}

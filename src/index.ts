@@ -1,5 +1,6 @@
 // Plugin entry points
 export { BasesPage } from "./pageType";
+export { BasesTransformer } from "./transformer";
 export { default as BasesBody } from "./components/BasesBody";
 
 // View registry — community plugins import this to register custom views
@@ -29,6 +30,9 @@ export type {
   QuartzComponentConstructor,
   QuartzPageTypePlugin,
   QuartzPageTypePluginInstance,
+  QuartzTransformerPlugin,
+  QuartzTransformerPluginInstance,
+  TreeTransform,
   PageMatcher,
   PageGenerator,
   VirtualPage,

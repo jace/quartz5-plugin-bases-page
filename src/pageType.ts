@@ -101,6 +101,9 @@ function createBasesCodeblockTransform(
     const locale = componentData.cfg?.locale ?? "en-US";
     const localeStrings = i18n(locale).components.bases;
     const allFiles = componentData.allFiles;
+    const slug = (componentData.fileData.slug as string) ?? "";
+    const allSlugs = ((componentData.ctx as Record<string, unknown>)?.allSlugs as string[]) ?? [];
+    const linkResolution = opts?.linkResolution ?? "shortest";
 
     visit(root, "element", (node: Element, index, parent) => {
       if (!parent || index === undefined) return;
@@ -112,7 +115,7 @@ function createBasesCodeblockTransform(
       if (!basesData) return;
 
       // Render the bases views inline — mirrors BasesBody.tsx logic
-      const htmlString = renderBasesInline(basesData, allFiles, locale, localeStrings, opts);
+      const htmlString = renderBasesInline(basesData, allFiles, locale, localeStrings, opts, slug, allSlugs, linkResolution);
       const fragment = fromHtml(htmlString, { fragment: true }) as HtmlRoot;
 
       // Replace the placeholder node's children with the rendered content
@@ -133,6 +136,9 @@ function renderBasesInline(
   locale: string,
   localeStrings: { noData: string; noViews: string },
   opts: BasesPageOptions | undefined,
+  slug: string,
+  allSlugs: string[],
+  linkResolution: "absolute" | "relative" | "shortest",
 ): string {
   const views = basesData.views ?? [];
 
@@ -173,7 +179,7 @@ function renderBasesInline(
       innerHtml = `<div class="bases-empty">${localeStrings.noData}</div>`;
     } else if (Renderer) {
       innerHtml = render(
-        h(Fragment, null, Renderer({ entries, view, basesData, total, locale })),
+        h(Fragment, null, Renderer({ entries, view, basesData, total, locale, slug, allSlugs, linkResolution })),
       );
     } else {
       innerHtml = `<div class="bases-empty">Unknown view type: ${view.type}</div>`;

@@ -27,6 +27,12 @@ export interface ViewRendererProps {
   basesData: BasesData;
   total: number;
   locale: string;
+  /** Slug of the page rendering this view (for resolving relative paths) */
+  slug: string;
+  /** All known slugs in the site (for `transformLink` with `shortest` strategy) */
+  allSlugs: string[];
+  /** Link resolution strategy ("absolute" | "relative" | "shortest"). Passed from plugin options. */
+  linkResolution: "absolute" | "relative" | "shortest";
 }
 
 /** View renderer function signature */
@@ -68,6 +74,12 @@ export interface BasesPageOptions {
    * at plugin init time, alongside (or overriding) built-in views.
    */
   customViews?: Record<string, ViewRenderer>;
+  /**
+   * How to resolve internal links in view renderers. Should match the
+   * `markdownLinkResolution` setting of the crawl-links plugin.
+   * Default: "shortest"
+   */
+  linkResolution?: "absolute" | "relative" | "shortest";
 }
 
 // === Sort & Filter Types ===

@@ -22,6 +22,9 @@ export default ((opts?: BasesPageOptions) => {
     const fileData = props.fileData as { basesData?: BasesData; basesOptions?: BasesPageOptions };
     const basesData = fileData.basesData;
     const basesOptions = fileData.basesOptions ?? opts;
+    const slug = (props.fileData.slug as string) ?? "";
+    const allSlugs = ((props.ctx as Record<string, unknown>)?.allSlugs as string[]) ?? [];
+    const linkResolution = basesOptions?.linkResolution ?? "shortest";
 
     if (!basesData) {
       return <div class="bases-page bases-empty">{localeStrings.noData}</div>;
@@ -82,6 +85,9 @@ export default ((opts?: BasesPageOptions) => {
                     basesData={basesData}
                     total={total}
                     locale={locale}
+                    slug={slug}
+                    allSlugs={allSlugs}
+                    linkResolution={linkResolution}
                   />
                 ) : (
                   <div class="bases-empty">Unknown view type: {view.type}</div>

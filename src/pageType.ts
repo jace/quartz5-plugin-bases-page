@@ -79,9 +79,7 @@ export const BasesPage: QuartzPageTypePlugin<BasesPageOptions> = (opts) => ({
  *
  * This runs after transclusion in `renderPage()`, when `allFiles` is available.
  */
-function createBasesCodeblockTransform(
-  opts: BasesPageOptions | undefined,
-): TreeTransform {
+function createBasesCodeblockTransform(opts: BasesPageOptions | undefined): TreeTransform {
   let builtinViewsRegistered = false;
 
   return (root: HtmlRoot, _slug: FullSlug, componentData: QuartzComponentProps) => {
@@ -115,7 +113,16 @@ function createBasesCodeblockTransform(
       if (!basesData) return;
 
       // Render the bases views inline — mirrors BasesBody.tsx logic
-      const htmlString = renderBasesInline(basesData, allFiles, locale, localeStrings, opts, slug, allSlugs, linkResolution);
+      const htmlString = renderBasesInline(
+        basesData,
+        allFiles,
+        locale,
+        localeStrings,
+        opts,
+        slug,
+        allSlugs,
+        linkResolution,
+      );
       const fragment = fromHtml(htmlString, { fragment: true }) as HtmlRoot;
 
       // Replace the placeholder node's children with the rendered content
@@ -132,7 +139,7 @@ function createBasesCodeblockTransform(
  */
 function renderBasesInline(
   basesData: BasesData,
-  allFiles: (Record<string, unknown>)[],
+  allFiles: Record<string, unknown>[],
   locale: string,
   localeStrings: { noData: string; noViews: string },
   opts: BasesPageOptions | undefined,
@@ -177,7 +184,11 @@ function renderBasesInline(
       innerHtml = `<div class="bases-empty">${localeStrings.noData}</div>`;
     } else if (Renderer) {
       innerHtml = render(
-        h(Fragment, null, Renderer({ entries, view, basesData, total, locale, slug, allSlugs, linkResolution })),
+        h(
+          Fragment,
+          null,
+          Renderer({ entries, view, basesData, total, locale, slug, allSlugs, linkResolution }),
+        ),
       );
     } else {
       innerHtml = `<div class="bases-empty">Unknown view type: ${view.type}</div>`;
@@ -186,9 +197,7 @@ function renderBasesInline(
     return `<div class="bases-view${activeClass}" data-view-index="${index}" data-view-type="${view.type}">${innerHtml}</div>`;
   });
 
-  const cssBlock = viewCssChunks.length > 0
-    ? `<style>${viewCssChunks.join("\n")}</style>`
-    : "";
+  const cssBlock = viewCssChunks.length > 0 ? `<style>${viewCssChunks.join("\n")}</style>` : "";
 
   return `${cssBlock}${selectorHtml}<div class="bases-view-container">${viewPanels.join("")}</div>`;
 }

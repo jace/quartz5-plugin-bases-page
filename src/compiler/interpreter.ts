@@ -14,6 +14,14 @@ export type EvalContext = {
     modified?: string;
   };
   formula: Record<string, unknown>;
+  self?: {
+    file: {
+      name: string;
+      path: string;
+      folder: string;
+      ext: string;
+    };
+  };
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -115,6 +123,9 @@ function getNestedValue(target: unknown, path: string[]): unknown {
 export function resolvePropertyValue(path: string, context: EvalContext): unknown {
   const trimmed = path.trim();
   if (!trimmed) return undefined;
+  if (trimmed.startsWith("this.")) {
+    return getNestedValue(context.self ?? {}, trimmed.slice(5).split("."));
+  }
   if (trimmed.startsWith("note.")) {
     return getNestedValue(context.note, trimmed.slice(5).split("."));
   }
@@ -129,6 +140,7 @@ export function resolvePropertyValue(path: string, context: EvalContext): unknow
 
 function resolveIdentifier(name: string, context: EvalContext): unknown {
   if (name.includes(".")) return resolvePropertyValue(name, context);
+  if (name === "this") return context.self ?? {};
   if (name === "note") return context.note;
   if (name === "file") return context.file;
   if (name === "formula") return context.formula;

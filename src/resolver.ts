@@ -1,5 +1,6 @@
 import type { BasesData, BasesEntry, BasesView, QuartzPluginData } from "./types";
 import { evaluate, evaluateFilter, resolvePropertyValue } from "./compiler";
+import type { EvalContext } from "./compiler";
 
 function normalizeStringArray(values: unknown): string[] {
   if (!Array.isArray(values)) return [];
@@ -7,6 +8,10 @@ function normalizeStringArray(values: unknown): string[] {
 }
 
 function getFilePath(fileData: QuartzPluginData, slug: string): string {
+  // Prefer relativePath (relative to content dir) over filePath (absolute).
+  // Self-context paths from .base files use ctx.allFiles which are relative,
+  // so note paths must also be relative for inFolder() comparisons to work.
+  if (typeof fileData.relativePath === "string") return fileData.relativePath;
   if (typeof fileData.filePath === "string") return fileData.filePath;
   return slug ? `${slug}.md` : "";
 }
@@ -96,6 +101,7 @@ export function resolveBasesEntries(
   basesData: BasesData,
   allFiles: QuartzPluginData[],
   view?: BasesView,
+  selfContext?: EvalContext["self"],
 ): { entries: BasesEntry[]; total: number } {
   const entries: BasesEntry[] = [];
   const formulas = basesData.formulas ?? {};
@@ -113,6 +119,7 @@ export function resolveBasesEntries(
       note: frontmatter,
       file: fileProperties,
       formula: {} as Record<string, unknown>,
+      self: selfContext,
     };
 
     // Evaluate formulas

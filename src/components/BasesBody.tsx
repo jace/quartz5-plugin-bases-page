@@ -5,6 +5,7 @@ import type {
 } from "@quartz-community/types";
 import type { BasesData, BasesPageOptions } from "../types";
 import { resolveBasesEntries } from "../resolver";
+import type { EvalContext } from "../compiler";
 import { i18n } from "../i18n";
 import { registerCustomViews, viewRegistry } from "../registry";
 import { ViewSelector } from "./ViewSelector";
@@ -19,9 +20,14 @@ export default ((opts?: BasesPageOptions) => {
   const Component: QuartzComponent = (props: QuartzComponentProps) => {
     const locale = props.cfg?.locale ?? "en-US";
     const localeStrings = i18n(locale).components.bases;
-    const fileData = props.fileData as { basesData?: BasesData; basesOptions?: BasesPageOptions };
+    const fileData = props.fileData as {
+      basesData?: BasesData;
+      basesOptions?: BasesPageOptions;
+      basesSelfContext?: EvalContext["self"];
+    };
     const basesData = fileData.basesData;
     const basesOptions = fileData.basesOptions ?? opts;
+    const basesSelfContext = fileData.basesSelfContext;
     const slug = (props.fileData.slug as string) ?? "";
     const allSlugs = ((props.ctx as Record<string, unknown>)?.allSlugs as string[]) ?? [];
     const linkResolution = basesOptions?.linkResolution ?? "shortest";
@@ -65,7 +71,12 @@ export default ((opts?: BasesPageOptions) => {
         <ViewSelector views={views} activeIndex={initialIndex} locale={locale} />
         <div class="bases-view-container">
           {views.map((view, index) => {
-            const { entries, total } = resolveBasesEntries(basesData, props.allFiles, view);
+            const { entries, total } = resolveBasesEntries(
+              basesData,
+              props.allFiles,
+              view,
+              basesSelfContext,
+            );
             const registration = viewRegistry.get(view.type);
             const Renderer = registration?.render;
             return (

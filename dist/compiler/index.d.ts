@@ -111,6 +111,14 @@ type EvalContext = {
         modified?: string;
     };
     formula: Record<string, unknown>;
+    self?: {
+        file: {
+            name: string;
+            path: string;
+            folder: string;
+            ext: string;
+        };
+    };
 };
 declare function resolvePropertyValue(path: string, context: EvalContext): unknown;
 

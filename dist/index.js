@@ -1,14 +1,15 @@
 import { createRequire } from 'module';
-import { BasesBody_default, resolveBasesEntries, registerBuiltinViews, i18n, ViewSelector } from './chunk-UCUNATUT.js';
-export { BasesBody_default as BasesBody } from './chunk-UCUNATUT.js';
+import { BasesBody_default, resolveBasesEntries, registerBuiltinViews, i18n, ViewSelector } from './chunk-7VF6ACDU.js';
+export { BasesBody_default as BasesBody } from './chunk-7VF6ACDU.js';
 import { registerCustomViews, viewRegistry } from './chunk-2AUMER56.js';
 export { registerCustomViews, viewRegistry } from './chunk-2AUMER56.js';
-export { compile, evaluate, evaluateFilter, resolvePropertyValue } from './chunk-46L5AVFM.js';
+export { compile, evaluate, evaluateFilter, resolvePropertyValue } from './chunk-YQWP27WF.js';
 import { __commonJS, __require, __export, __toESM } from './chunk-TDUJOYTU.js';
 import { h as h$1, Fragment, options } from 'preact';
 import { VFile } from 'vfile';
 import { readFileSync } from 'fs';
 import { join } from 'path';
+import { slugifyFilePath } from '@quartz-community/utils';
 export { transformLink } from '@quartz-community/utils';
 
 createRequire(import.meta.url);
@@ -17867,16 +17868,36 @@ var BasesPage = (opts) => ({
       }
       const basesData = parseBasesData(raw);
       if (!basesData) continue;
-      const slug = filePath.replace(/\.base$/, "");
+      const slug = slugifyFilePath(
+        filePath.replace(/\.base$/, "")
+      );
       const baseName = slug.split("/").pop() ?? "Base";
+      const lastSlash = filePath.lastIndexOf("/");
+      const folder = lastSlash >= 0 ? filePath.slice(0, lastSlash) : "";
+      const dotIndex = filePath.lastIndexOf(".");
+      const ext = dotIndex >= 0 ? filePath.slice(dotIndex + 1) : "";
+      const basesSelfContext = {
+        file: {
+          name: baseName,
+          path: filePath,
+          folder,
+          ext
+        }
+      };
       virtualPages.push({
         slug,
         title: baseName,
         data: {
           frontmatter: { title: baseName, tags: [] },
-          links: resolveBasesEntries(basesData, allFileData).entries.map((e2) => e2.slug),
+          links: resolveBasesEntries(
+            basesData,
+            allFileData,
+            void 0,
+            basesSelfContext
+          ).entries.map((e2) => e2.slug),
           basesData,
-          basesOptions: opts
+          basesOptions: opts,
+          basesSelfContext
         }
       });
     }

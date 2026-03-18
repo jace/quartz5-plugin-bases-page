@@ -1,6 +1,6 @@
 import { createRequire } from 'module';
 import { viewRegistry, registerCustomViews } from './chunk-2AUMER56.js';
-import { evaluate, evaluateFilter, resolvePropertyValue } from './chunk-46L5AVFM.js';
+import { evaluate, evaluateFilter, resolvePropertyValue } from './chunk-YQWP27WF.js';
 import { jsx, jsxs, Fragment } from 'preact/jsx-runtime';
 
 createRequire(import.meta.url);
@@ -23,6 +23,7 @@ function normalizeStringArray(values) {
   return values.filter((value) => typeof value === "string");
 }
 function getFilePath(fileData, slug) {
+  if (typeof fileData.relativePath === "string") return fileData.relativePath;
   if (typeof fileData.filePath === "string") return fileData.filePath;
   return slug ? `${slug}.md` : "";
 }
@@ -85,7 +86,7 @@ function sortEntries(entries, view) {
     return sign * compareSort(leftValue, rightValue);
   });
 }
-function resolveBasesEntries(basesData, allFiles, view) {
+function resolveBasesEntries(basesData, allFiles, view, selfContext) {
   const entries = [];
   const formulas = basesData.formulas ?? {};
   for (const fileData of allFiles) {
@@ -98,7 +99,8 @@ function resolveBasesEntries(basesData, allFiles, view) {
     const context = {
       note: frontmatter,
       file: fileProperties,
-      formula: {}
+      formula: {},
+      self: selfContext
     };
     for (const [name, expr] of Object.entries(formulas)) {
       context.formula[name] = evaluate(expr, context);
@@ -638,6 +640,7 @@ var BasesBody_default = ((opts) => {
     const fileData = props.fileData;
     const basesData = fileData.basesData;
     const basesOptions = fileData.basesOptions ?? opts;
+    const basesSelfContext = fileData.basesSelfContext;
     const slug = props.fileData.slug ?? "";
     const allSlugs = props.ctx?.allSlugs ?? [];
     const linkResolution = basesOptions?.linkResolution ?? "shortest";
@@ -670,7 +673,12 @@ var BasesBody_default = ((opts) => {
       viewCssChunks.length > 0 && /* @__PURE__ */ jsx("style", { dangerouslySetInnerHTML: { __html: viewCssChunks.join("\n") } }),
       /* @__PURE__ */ jsx(ViewSelector, { views, activeIndex: initialIndex, locale }),
       /* @__PURE__ */ jsx("div", { class: "bases-view-container", children: views.map((view, index) => {
-        const { entries, total } = resolveBasesEntries(basesData, props.allFiles, view);
+        const { entries, total } = resolveBasesEntries(
+          basesData,
+          props.allFiles,
+          view,
+          basesSelfContext
+        );
         const registration = viewRegistry.get(view.type);
         const Renderer = registration?.render;
         return /* @__PURE__ */ jsx(
@@ -708,5 +716,5 @@ var BasesBody_default = ((opts) => {
 });
 
 export { BasesBody_default, ViewSelector, i18n, registerBuiltinViews, resolveBasesEntries };
-//# sourceMappingURL=chunk-UCUNATUT.js.map
-//# sourceMappingURL=chunk-UCUNATUT.js.map
+//# sourceMappingURL=chunk-7VF6ACDU.js.map
+//# sourceMappingURL=chunk-7VF6ACDU.js.map

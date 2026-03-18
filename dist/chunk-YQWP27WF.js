@@ -1132,6 +1132,9 @@ function getNestedValue2(target, path) {
 function resolvePropertyValue(path, context) {
   const trimmed = path.trim();
   if (!trimmed) return void 0;
+  if (trimmed.startsWith("this.")) {
+    return getNestedValue2(context.self ?? {}, trimmed.slice(5).split("."));
+  }
   if (trimmed.startsWith("note.")) {
     return getNestedValue2(context.note, trimmed.slice(5).split("."));
   }
@@ -1145,6 +1148,7 @@ function resolvePropertyValue(path, context) {
 }
 function resolveIdentifier(name, context) {
   if (name.includes(".")) return resolvePropertyValue(name, context);
+  if (name === "this") return context.self ?? {};
   if (name === "note") return context.note;
   if (name === "file") return context.file;
   if (name === "formula") return context.formula;
@@ -1351,5 +1355,5 @@ function evaluateFilter(node, context) {
 }
 
 export { compile, evaluate, evaluateFilter, resolvePropertyValue };
-//# sourceMappingURL=chunk-46L5AVFM.js.map
-//# sourceMappingURL=chunk-46L5AVFM.js.map
+//# sourceMappingURL=chunk-YQWP27WF.js.map
+//# sourceMappingURL=chunk-YQWP27WF.js.map

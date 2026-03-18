@@ -17871,7 +17871,8 @@ var BasesPage = (opts) => ({
       const slug = slugifyFilePath(
         filePath.replace(/\.base$/, "")
       );
-      const baseName = slug.split("/").pop() ?? "Base";
+      const fileWithoutExt = filePath.replace(/\.base$/, "");
+      const baseName = fileWithoutExt.split("/").pop() ?? "Base";
       const lastSlash = filePath.lastIndexOf("/");
       const folder = lastSlash >= 0 ? filePath.slice(0, lastSlash) : "";
       const dotIndex = filePath.lastIndexOf(".");

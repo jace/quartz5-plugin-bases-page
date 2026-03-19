@@ -1,13 +1,14 @@
 import type { ViewRenderer, ViewTypeRegistration } from "../../types";
+import type { FullSlug } from "@quartz-community/types";
 import { i18n } from "../../i18n";
 import {
   getColumnLabel,
-  getColumns,
   isEmptyValue,
   renderCellValue,
   resolveEntryPropertyValue,
 } from "../shared/cell";
-import { resolveRelative, slugifyPath } from "../../util/path";
+import { resolveRelative } from "../../util/path";
+import { transformLink } from "@quartz-community/utils";
 
 function formatMessage(template: string, values: Record<string, string | number>): string {
   return Object.entries(values).reduce(
@@ -19,7 +20,16 @@ function formatMessage(template: string, values: Record<string, string | number>
 const HEX_COLOR_RE = /^#(?:[0-9a-f]{3}){1,2}$/i;
 const WIKILINK_RE = /^\[\[(.+?)(?:\|.*)?\]\]$/;
 
-export function resolveImageSrc(raw: string, slug: string): { src: string; isColor: boolean } {
+export interface ResolveImageOpts {
+  slug: string;
+  allSlugs: string[];
+  linkResolution: "absolute" | "relative" | "shortest";
+}
+
+export function resolveImageSrc(
+  raw: string,
+  opts: ResolveImageOpts,
+): { src: string; isColor: boolean } {
   if (!raw) return { src: "", isColor: false };
 
   if (HEX_COLOR_RE.test(raw)) {
@@ -29,16 +39,31 @@ export function resolveImageSrc(raw: string, slug: string): { src: string; isCol
   const wikiMatch = WIKILINK_RE.exec(raw);
   if (wikiMatch?.[1]) {
     const target = wikiMatch[1].trim();
-    const resolved = resolveRelative(slug, slugifyPath(target));
-    return { src: resolved, isColor: false };
+    const resolved = transformLink(opts.slug as FullSlug, target, {
+      strategy: opts.linkResolution,
+      allSlugs: opts.allSlugs as FullSlug[],
+    });
+    return { src: String(resolved), isColor: false };
   }
 
   return { src: raw, isColor: false };
 }
 
-const CardsView: ViewRenderer = ({ entries, view, basesData, total, locale, slug }) => {
+const CardsView: ViewRenderer = ({
+  entries,
+  view,
+  basesData,
+  total,
+  locale,
+  slug,
+  allSlugs,
+  linkResolution,
+}) => {
   const imageProperty = typeof view.image === "string" ? view.image : undefined;
-  const columns = getColumns(view, basesData, entries).filter((column) => column !== imageProperty);
+  const cardMetaColumns =
+    view.order && view.order.length > 0
+      ? view.order.filter((column) => column !== imageProperty)
+      : [];
   const localeStrings = i18n(locale).components.bases;
   const cardSize = view.cardSize;
   const aspectRatio = view.imageAspectRatio ?? view.cardAspect;
@@ -47,6 +72,7 @@ const CardsView: ViewRenderer = ({ entries, view, basesData, total, locale, slug
     typeof cardSize === "number" && cardSize > 0
       ? { gridTemplateColumns: `repeat(auto-fit, minmax(${cardSize}px, 1fr))` }
       : undefined;
+  const imageOpts: ResolveImageOpts = { slug, allSlugs, linkResolution };
 
   return (
     <div class="bases-cards-wrapper">
@@ -63,7 +89,7 @@ const CardsView: ViewRenderer = ({ entries, view, basesData, total, locale, slug
             ? resolveEntryPropertyValue(imageProperty, entry)
             : undefined;
           const rawImage = imageValue ? String(imageValue) : "";
-          const { src: imageSrc, isColor } = resolveImageSrc(rawImage, slug);
+          const { src: imageSrc, isColor } = resolveImageSrc(rawImage, imageOpts);
           const imageAspect =
             typeof aspectRatio === "number" && aspectRatio > 0
               ? { aspectRatio: String(aspectRatio) }
@@ -90,7 +116,7 @@ const CardsView: ViewRenderer = ({ entries, view, basesData, total, locale, slug
               <div class="bases-card-body">
                 <span class="bases-card-title">{entry.title}</span>
                 <div class="bases-card-meta">
-                  {columns.map((column) => {
+                  {cardMetaColumns.map((column) => {
                     const value = resolveEntryPropertyValue(column, entry);
                     if (isEmptyValue(value)) return null;
                     return (

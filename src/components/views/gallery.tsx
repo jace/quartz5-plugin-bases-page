@@ -3,6 +3,7 @@ import { i18n } from "../../i18n";
 import { resolveEntryPropertyValue } from "../shared/cell";
 import { resolveRelative } from "../../util/path";
 import { resolveImageSrc } from "./cards";
+import type { ResolveImageOpts } from "./cards";
 
 function formatMessage(template: string, values: Record<string, string | number>): string {
   return Object.entries(values).reduce(
@@ -11,12 +12,21 @@ function formatMessage(template: string, values: Record<string, string | number>
   );
 }
 
-const GalleryView: ViewRenderer = ({ entries, view, total, locale, slug }) => {
+const GalleryView: ViewRenderer = ({
+  entries,
+  view,
+  total,
+  locale,
+  slug,
+  allSlugs,
+  linkResolution,
+}) => {
   const imageProperty = typeof view.image === "string" ? view.image : undefined;
   const localeStrings = i18n(locale).components.bases;
   const columns =
     typeof view.cardSize === "number" && view.cardSize > 0 ? Math.round(view.cardSize) : 3;
   const gridStyle = { gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` };
+  const imageOpts: ResolveImageOpts = { slug, allSlugs, linkResolution };
 
   return (
     <div class="bases-gallery-wrapper">
@@ -32,7 +42,7 @@ const GalleryView: ViewRenderer = ({ entries, view, total, locale, slug }) => {
             ? resolveEntryPropertyValue(imageProperty, entry)
             : undefined;
           const rawImage = imageValue ? String(imageValue) : "";
-          const { src: imageSrc, isColor } = resolveImageSrc(rawImage, slug);
+          const { src: imageSrc, isColor } = resolveImageSrc(rawImage, imageOpts);
           return (
             <div class="bases-gallery-item">
               <div class="bases-gallery-image">

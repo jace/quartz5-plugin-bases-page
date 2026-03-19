@@ -2,6 +2,7 @@ import { createRequire } from 'module';
 import { viewRegistry, registerCustomViews } from './chunk-2AUMER56.js';
 import { evaluate, evaluateFilter, resolvePropertyValue } from './chunk-AA6BIPOH.js';
 import { jsx, jsxs, Fragment } from 'preact/jsx-runtime';
+import { transformLink } from '@quartz-community/utils';
 
 createRequire(import.meta.url);
 function ViewSelector({ views, activeIndex }) {
@@ -476,7 +477,7 @@ function formatMessage2(template, values) {
 }
 var HEX_COLOR_RE = /^#(?:[0-9a-f]{3}){1,2}$/i;
 var WIKILINK_RE2 = /^\[\[(.+?)(?:\|.*)?\]\]$/;
-function resolveImageSrc(raw, slug) {
+function resolveImageSrc(raw, opts) {
   if (!raw) return { src: "", isColor: false };
   if (HEX_COLOR_RE.test(raw)) {
     return { src: raw, isColor: true };
@@ -484,19 +485,32 @@ function resolveImageSrc(raw, slug) {
   const wikiMatch = WIKILINK_RE2.exec(raw);
   if (wikiMatch?.[1]) {
     const target = wikiMatch[1].trim();
-    const resolved = resolveRelative(slug, slugifyPath(target));
-    return { src: resolved, isColor: false };
+    const resolved = transformLink(opts.slug, target, {
+      strategy: opts.linkResolution,
+      allSlugs: opts.allSlugs
+    });
+    return { src: String(resolved), isColor: false };
   }
   return { src: raw, isColor: false };
 }
-var CardsView = ({ entries, view, basesData, total, locale, slug }) => {
+var CardsView = ({
+  entries,
+  view,
+  basesData,
+  total,
+  locale,
+  slug,
+  allSlugs,
+  linkResolution
+}) => {
   const imageProperty = typeof view.image === "string" ? view.image : void 0;
-  const columns = getColumns(view, basesData, entries).filter((column) => column !== imageProperty);
+  const cardMetaColumns = view.order && view.order.length > 0 ? view.order.filter((column) => column !== imageProperty) : [];
   const localeStrings = i18n(locale).components.bases;
   const cardSize = view.cardSize;
   const aspectRatio = view.imageAspectRatio ?? view.cardAspect;
   const imageFit = view.imageFit === "contain" ? "contain" : "cover";
   const gridStyle = typeof cardSize === "number" && cardSize > 0 ? { gridTemplateColumns: `repeat(auto-fit, minmax(${cardSize}px, 1fr))` } : void 0;
+  const imageOpts = { slug, allSlugs, linkResolution };
   return /* @__PURE__ */ jsxs("div", { class: "bases-cards-wrapper", children: [
     /* @__PURE__ */ jsx("div", { class: "bases-view-meta", children: formatMessage2(localeStrings.showingCount, {
       count: entries.length,
@@ -506,7 +520,7 @@ var CardsView = ({ entries, view, basesData, total, locale, slug }) => {
       const ctx = { slug: entry.slug };
       const imageValue = imageProperty ? resolveEntryPropertyValue(imageProperty, entry) : void 0;
       const rawImage = imageValue ? String(imageValue) : "";
-      const { src: imageSrc, isColor } = resolveImageSrc(rawImage, slug);
+      const { src: imageSrc, isColor } = resolveImageSrc(rawImage, imageOpts);
       const imageAspect = typeof aspectRatio === "number" && aspectRatio > 0 ? { aspectRatio: String(aspectRatio) } : void 0;
       const href = resolveRelative(slug, entry.slug);
       return /* @__PURE__ */ jsxs("a", { href, class: "internal bases-card", "data-slug": entry.slug, children: [
@@ -528,7 +542,7 @@ var CardsView = ({ entries, view, basesData, total, locale, slug }) => {
         ),
         /* @__PURE__ */ jsxs("div", { class: "bases-card-body", children: [
           /* @__PURE__ */ jsx("span", { class: "bases-card-title", children: entry.title }),
-          /* @__PURE__ */ jsx("div", { class: "bases-card-meta", children: columns.map((column) => {
+          /* @__PURE__ */ jsx("div", { class: "bases-card-meta", children: cardMetaColumns.map((column) => {
             const value = resolveEntryPropertyValue(column, entry);
             if (isEmptyValue(value)) return null;
             return /* @__PURE__ */ jsxs("div", { class: "bases-card-row", children: [
@@ -553,11 +567,20 @@ function formatMessage3(template, values) {
     template
   );
 }
-var GalleryView = ({ entries, view, total, locale, slug }) => {
+var GalleryView = ({
+  entries,
+  view,
+  total,
+  locale,
+  slug,
+  allSlugs,
+  linkResolution
+}) => {
   const imageProperty = typeof view.image === "string" ? view.image : void 0;
   const localeStrings = i18n(locale).components.bases;
   const columns = typeof view.cardSize === "number" && view.cardSize > 0 ? Math.round(view.cardSize) : 3;
   const gridStyle = { gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` };
+  const imageOpts = { slug, allSlugs, linkResolution };
   return /* @__PURE__ */ jsxs("div", { class: "bases-gallery-wrapper", children: [
     /* @__PURE__ */ jsx("div", { class: "bases-view-meta", children: formatMessage3(localeStrings.showingCount, {
       count: entries.length,
@@ -566,7 +589,7 @@ var GalleryView = ({ entries, view, total, locale, slug }) => {
     /* @__PURE__ */ jsx("div", { class: "bases-gallery", style: gridStyle, children: entries.map((entry) => {
       const imageValue = imageProperty ? resolveEntryPropertyValue(imageProperty, entry) : void 0;
       const rawImage = imageValue ? String(imageValue) : "";
-      const { src: imageSrc, isColor } = resolveImageSrc(rawImage, slug);
+      const { src: imageSrc, isColor } = resolveImageSrc(rawImage, imageOpts);
       return /* @__PURE__ */ jsxs("div", { class: "bases-gallery-item", children: [
         /* @__PURE__ */ jsx("div", { class: "bases-gallery-image", children: imageSrc && !isColor ? /* @__PURE__ */ jsx("img", { src: imageSrc, alt: entry.title, loading: "lazy" }) : imageSrc && isColor ? /* @__PURE__ */ jsx("span", { class: "bases-gallery-placeholder", style: { background: imageSrc } }) : /* @__PURE__ */ jsx(
           "span",
@@ -837,5 +860,5 @@ var BasesBody_default = ((opts) => {
 });
 
 export { BasesBody_default, ViewSelector, i18n, registerBuiltinViews, resolveBasesEntries };
-//# sourceMappingURL=chunk-ATCPJRPS.js.map
-//# sourceMappingURL=chunk-ATCPJRPS.js.map
+//# sourceMappingURL=chunk-TSTXKIKK.js.map
+//# sourceMappingURL=chunk-TSTXKIKK.js.map

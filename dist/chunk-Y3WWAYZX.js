@@ -1190,6 +1190,13 @@ registerMethodFunction("string", "asFile", (target, _args, context) => {
     const normalized = path.trim();
     const found = lookup.get(normalized) ?? lookup.get(normalized.replace(/\.md$/, "")) ?? (!normalized.endsWith(".md") ? lookup.get(`${normalized}.md`) : void 0);
     if (found) return { ...found };
+    const suffix = `/${normalized}`;
+    const suffixMd = `/${normalized}.md`;
+    for (const [key, value] of lookup) {
+      if (key.endsWith(suffix) || key.endsWith(suffixMd)) {
+        return { ...value };
+      }
+    }
   }
   return buildFileValue(path);
 });
@@ -1695,5 +1702,5 @@ function evaluateFilter(node, context) {
 }
 
 export { compile, evaluate, evaluateFilter, resolvePropertyValue };
-//# sourceMappingURL=chunk-BUL4PXPV.js.map
-//# sourceMappingURL=chunk-BUL4PXPV.js.map
+//# sourceMappingURL=chunk-Y3WWAYZX.js.map
+//# sourceMappingURL=chunk-Y3WWAYZX.js.map

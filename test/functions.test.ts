@@ -136,6 +136,43 @@ describe("string methods", () => {
     expect(result.tags).toEqual([]);
     expect(result.path).toBe("unknown/file.md");
   });
+
+  it("resolves short basename via _fileLookup", () => {
+    const lookup = new Map<string, EvalContext["file"]>();
+    lookup.set("Compendium/Species/Dryad/Apple.md", {
+      name: "Apple.md",
+      basename: "Apple",
+      path: "Compendium/Species/Dryad/Apple.md",
+      folder: "Compendium/Species/Dryad",
+      ext: "md",
+      tags: ["lineage", "dryad"],
+      links: [],
+    });
+    const ctx = { ...context, _fileLookup: lookup };
+    const result = evaluate('"Apple".asFile()', ctx) as Record<string, unknown>;
+    expect(result).toBeDefined();
+    expect(result.basename).toBe("Apple");
+    expect(result.tags).toEqual(["lineage", "dryad"]);
+    expect(result.path).toBe("Compendium/Species/Dryad/Apple.md");
+  });
+
+  it("resolves path suffix via _fileLookup", () => {
+    const lookup = new Map<string, EvalContext["file"]>();
+    lookup.set("Compendium/Species/Dryad/Apple.md", {
+      name: "Apple.md",
+      basename: "Apple",
+      path: "Compendium/Species/Dryad/Apple.md",
+      folder: "Compendium/Species/Dryad",
+      ext: "md",
+      tags: ["lineage"],
+      links: [],
+    });
+    const ctx = { ...context, _fileLookup: lookup };
+    const result = evaluate('"Dryad/Apple".asFile()', ctx) as Record<string, unknown>;
+    expect(result).toBeDefined();
+    expect(result.basename).toBe("Apple");
+    expect(result.path).toBe("Compendium/Species/Dryad/Apple.md");
+  });
 });
 
 describe("number methods", () => {

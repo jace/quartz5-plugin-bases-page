@@ -137,9 +137,20 @@ export function resolveBasesEntries(
     const fm = (fd.frontmatter ?? {}) as Record<string, unknown>;
     const fp = buildFileProperties(fd, fdSlug, fm);
     const fileValue: EvalContext["file"] = { ...fp, properties: fm };
+
     fileLookup.set(fdPath, fileValue);
     const withoutExt = fdPath.replace(/\.md$/, "");
     if (withoutExt !== fdPath) fileLookup.set(withoutExt, fileValue);
+
+    // Register by slug and basename so OFM's short embed names (e.g. "Apple"
+    // from ![[Apple]]) resolve. First-registered wins to avoid ambiguous overwrites.
+    if (fdSlug && !fileLookup.has(fdSlug)) {
+      fileLookup.set(fdSlug, fileValue);
+    }
+    const base = getBaseName(fdPath);
+    if (base && !fileLookup.has(base)) {
+      fileLookup.set(base, fileValue);
+    }
   }
 
   for (const fileData of allFiles) {

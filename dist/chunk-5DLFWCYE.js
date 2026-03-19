@@ -1,6 +1,6 @@
 import { createRequire } from 'module';
 import { viewRegistry, registerCustomViews } from './chunk-2AUMER56.js';
-import { evaluate, evaluateFilter, resolvePropertyValue } from './chunk-BUL4PXPV.js';
+import { evaluate, evaluateFilter, resolvePropertyValue } from './chunk-Y3WWAYZX.js';
 import { jsx, jsxs, Fragment } from 'preact/jsx-runtime';
 
 createRequire(import.meta.url);
@@ -131,6 +131,13 @@ function resolveBasesEntries(basesData, allFiles, view, selfContext) {
     fileLookup.set(fdPath, fileValue);
     const withoutExt = fdPath.replace(/\.md$/, "");
     if (withoutExt !== fdPath) fileLookup.set(withoutExt, fileValue);
+    if (fdSlug && !fileLookup.has(fdSlug)) {
+      fileLookup.set(fdSlug, fileValue);
+    }
+    const base = getBaseName(fdPath);
+    if (base && !fileLookup.has(base)) {
+      fileLookup.set(base, fileValue);
+    }
   }
   for (const fileData of allFiles) {
     const slug = typeof fileData.slug === "string" ? fileData.slug : "";
@@ -791,5 +798,5 @@ var BasesBody_default = ((opts) => {
 });
 
 export { BasesBody_default, ViewSelector, i18n, registerBuiltinViews, resolveBasesEntries };
-//# sourceMappingURL=chunk-56OUEGRV.js.map
-//# sourceMappingURL=chunk-56OUEGRV.js.map
+//# sourceMappingURL=chunk-5DLFWCYE.js.map
+//# sourceMappingURL=chunk-5DLFWCYE.js.map

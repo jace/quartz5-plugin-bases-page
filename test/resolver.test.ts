@@ -304,4 +304,78 @@ describe("resolveBasesEntries", () => {
     expect(refs).toHaveLength(1);
     expect(refs[0]?.name).toBe("guide.md");
   });
+
+  it("resolves short basename embeds from OFM wikilinks", () => {
+    const appleFile = makeFile({
+      slug: "Compendium/Species/Dryad/Apple",
+      filePath: "Compendium/Species/Dryad/Apple.md",
+      frontmatter: { title: "Apple", tags: ["homebrew", "lineage", "dryad"] },
+    });
+    const cherryFile = makeFile({
+      slug: "Compendium/Species/Dryad/Cherry",
+      filePath: "Compendium/Species/Dryad/Cherry.md",
+      frontmatter: { title: "Cherry", tags: ["homebrew", "lineage", "dryad"] },
+    });
+    const oakFile = makeFile({
+      slug: "Compendium/Species/Dryad/Oak",
+      filePath: "Compendium/Species/Dryad/Oak.md",
+      frontmatter: { title: "Oak", tags: ["homebrew", "lineage", "dryad"] },
+    });
+    const dryadFile = makeFile({
+      slug: "Compendium/Species/Dryad/index",
+      filePath: "Compendium/Species/Dryad/index.md",
+      frontmatter: { title: "Dryad", tags: ["species"], source: "Homebrew" },
+    });
+    (dryadFile as Record<string, unknown>).embeds = ["Apple", "Cherry", "Oak"];
+
+    const basesData: BasesData = {
+      formulas: {
+        Inheritances: 'file.embeds.filter(value.asFile().hasTag("lineage")).map(value.asFile())',
+      },
+      filters: 'file.tags.contains("species")',
+    };
+
+    const allFiles = [appleFile, cherryFile, oakFile, dryadFile];
+    const result = resolveBasesEntries(basesData, allFiles);
+    expect(result.entries).toHaveLength(1);
+    const dryad = result.entries[0];
+    expect(dryad?.slug).toBe("Compendium/Species/Dryad/index");
+    const inheritances = dryad?.formulaValues.Inheritances as Record<string, unknown>[];
+    expect(inheritances).toHaveLength(3);
+    expect(inheritances.map((f) => f.basename)).toEqual(["Apple", "Cherry", "Oak"]);
+    expect(inheritances.every((f) => (f.tags as string[]).includes("lineage"))).toBe(true);
+  });
+
+  it("resolves short basename embeds with non-matching tags filtered out", () => {
+    const lineageFile = makeFile({
+      slug: "Species/Dryad/Apple",
+      filePath: "Species/Dryad/Apple.md",
+      frontmatter: { title: "Apple", tags: ["lineage"] },
+    });
+    const creatureFile = makeFile({
+      slug: "Species/Dryad/Treant",
+      filePath: "Species/Dryad/Treant.md",
+      frontmatter: { title: "Treant", tags: ["creature"] },
+    });
+    const speciesFile = makeFile({
+      slug: "Species/Dryad/index",
+      filePath: "Species/Dryad/index.md",
+      frontmatter: { title: "Dryad", tags: ["species"] },
+    });
+    (speciesFile as Record<string, unknown>).embeds = ["Apple", "Treant"];
+
+    const basesData: BasesData = {
+      formulas: {
+        Inheritances: 'file.embeds.filter(value.asFile().hasTag("lineage")).map(value.asFile())',
+      },
+      filters: 'file.tags.contains("species")',
+    };
+
+    const allFiles = [lineageFile, creatureFile, speciesFile];
+    const result = resolveBasesEntries(basesData, allFiles);
+    expect(result.entries).toHaveLength(1);
+    const inheritances = result.entries[0]?.formulaValues.Inheritances as Record<string, unknown>[];
+    expect(inheritances).toHaveLength(1);
+    expect(inheritances[0]?.basename).toBe("Apple");
+  });
 });

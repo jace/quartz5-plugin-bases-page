@@ -655,13 +655,21 @@ registerMethodFunction("string", "asFile", (target, _args, context) => {
   if (!path) return undefined;
   const lookup = context._fileLookup;
   if (lookup) {
-    // Try exact path first, then with/without .md extension
     const normalized = path.trim();
     const found =
       lookup.get(normalized) ??
       lookup.get(normalized.replace(/\.md$/, "")) ??
       (!normalized.endsWith(".md") ? lookup.get(`${normalized}.md`) : undefined);
     if (found) return { ...found };
+
+    // Fallback: match by path suffix (e.g. "Apple" matches "Compendium/Species/Dryad/Apple")
+    const suffix = `/${normalized}`;
+    const suffixMd = `/${normalized}.md`;
+    for (const [key, value] of lookup) {
+      if (key.endsWith(suffix) || key.endsWith(suffixMd)) {
+        return { ...value };
+      }
+    }
   }
   return buildFileValue(path);
 });

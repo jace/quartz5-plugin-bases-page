@@ -62,7 +62,7 @@ const CardsView: ViewRenderer = ({
   const imageProperty = typeof view.image === "string" ? view.image : undefined;
   const cardMetaColumns =
     view.order && view.order.length > 0
-      ? view.order.filter((column) => column !== imageProperty)
+      ? view.order.filter((column) => column !== imageProperty && column !== "file.name")
       : [];
   const localeStrings = i18n(locale).components.bases;
   const cardSize = view.cardSize;

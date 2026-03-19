@@ -504,7 +504,7 @@ var CardsView = ({
   linkResolution
 }) => {
   const imageProperty = typeof view.image === "string" ? view.image : void 0;
-  const cardMetaColumns = view.order && view.order.length > 0 ? view.order.filter((column) => column !== imageProperty) : [];
+  const cardMetaColumns = view.order && view.order.length > 0 ? view.order.filter((column) => column !== imageProperty && column !== "file.name") : [];
   const localeStrings = i18n(locale).components.bases;
   const cardSize = view.cardSize;
   const aspectRatio = view.imageAspectRatio ?? view.cardAspect;
@@ -860,5 +860,5 @@ var BasesBody_default = ((opts) => {
 });
 
 export { BasesBody_default, ViewSelector, i18n, registerBuiltinViews, resolveBasesEntries };
-//# sourceMappingURL=chunk-TSTXKIKK.js.map
-//# sourceMappingURL=chunk-TSTXKIKK.js.map
+//# sourceMappingURL=chunk-GN43XFLM.js.map
+//# sourceMappingURL=chunk-GN43XFLM.js.map

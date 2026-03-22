@@ -887,13 +887,13 @@ registerGlobalFunction("list", ([value]) => {
   return [value];
 });
 registerGlobalFunction("link", ([path, display]) => {
-  const target = toStringValue(path);
+  const target = isFileValue(path) ? path.path.replace(/\.md$/, "") : toStringValue(path);
   if (!target) return "";
-  const label = toStringValue(display);
+  const label = isFileValue(display) ? display.basename : toStringValue(display);
   return label ? `[[${target}|${label}]]` : `[[${target}]]`;
 });
 registerGlobalFunction("image", ([path]) => {
-  const target = toStringValue(path);
+  const target = isFileValue(path) ? path.path.replace(/\.md$/, "") : toStringValue(path);
   if (!target) return "";
   return `![[${target}]]`;
 });
@@ -1707,5 +1707,5 @@ function evaluateFilter(node, context) {
 }
 
 export { compile, evaluate, evaluateFilter, resolvePropertyValue };
-//# sourceMappingURL=chunk-AA6BIPOH.js.map
-//# sourceMappingURL=chunk-AA6BIPOH.js.map
+//# sourceMappingURL=chunk-3J3AIKHW.js.map
+//# sourceMappingURL=chunk-3J3AIKHW.js.map

@@ -306,14 +306,14 @@ registerGlobalFunction("list", ([value]) => {
 });
 
 registerGlobalFunction("link", ([path, display]) => {
-  const target = toStringValue(path);
+  const target = isFileValue(path) ? path.path.replace(/\.md$/, "") : toStringValue(path);
   if (!target) return "";
-  const label = toStringValue(display);
+  const label = isFileValue(display) ? display.basename : toStringValue(display);
   return label ? `[[${target}|${label}]]` : `[[${target}]]`;
 });
 
 registerGlobalFunction("image", ([path]) => {
-  const target = toStringValue(path);
+  const target = isFileValue(path) ? path.path.replace(/\.md$/, "") : toStringValue(path);
   if (!target) return "";
   return `![[${target}]]`;
 });

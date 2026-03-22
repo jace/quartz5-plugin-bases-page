@@ -1,9 +1,9 @@
 import { createRequire } from 'module';
-import { BasesBody_default, resolveBasesEntries, registerBuiltinViews, i18n, ViewSelector } from './chunk-IYVW6USQ.js';
-export { BasesBody_default as BasesBody } from './chunk-IYVW6USQ.js';
+import { BasesBody_default, resolveBasesEntries, registerBuiltinViews, i18n, ViewSelector } from './chunk-JIBTBRXE.js';
+export { BasesBody_default as BasesBody } from './chunk-JIBTBRXE.js';
 import { registerCustomViews, viewRegistry } from './chunk-2AUMER56.js';
 export { registerCustomViews, viewRegistry } from './chunk-2AUMER56.js';
-export { compile, evaluate, evaluateFilter, resolvePropertyValue } from './chunk-AA6BIPOH.js';
+export { compile, evaluate, evaluateFilter, resolvePropertyValue } from './chunk-3J3AIKHW.js';
 import { __commonJS, __require, __export, __toESM } from './chunk-TDUJOYTU.js';
 import { h as h$1, Fragment, options } from 'preact';
 import { VFile } from 'vfile';

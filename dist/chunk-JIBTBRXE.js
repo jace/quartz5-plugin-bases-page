@@ -1,6 +1,6 @@
 import { createRequire } from 'module';
 import { viewRegistry, registerCustomViews } from './chunk-2AUMER56.js';
-import { evaluate, evaluateFilter, resolvePropertyValue } from './chunk-AA6BIPOH.js';
+import { evaluate, evaluateFilter, resolvePropertyValue } from './chunk-3J3AIKHW.js';
 import { jsx, jsxs, Fragment } from 'preact/jsx-runtime';
 import { transformLink, slugifyPath } from '@quartz-community/utils';
 
@@ -905,5 +905,5 @@ var BasesBody_default = ((opts) => {
 });
 
 export { BasesBody_default, ViewSelector, i18n, registerBuiltinViews, resolveBasesEntries };
-//# sourceMappingURL=chunk-IYVW6USQ.js.map
-//# sourceMappingURL=chunk-IYVW6USQ.js.map
+//# sourceMappingURL=chunk-JIBTBRXE.js.map
+//# sourceMappingURL=chunk-JIBTBRXE.js.map

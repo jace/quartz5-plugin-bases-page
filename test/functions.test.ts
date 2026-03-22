@@ -371,6 +371,33 @@ describe("link helpers", () => {
     expect(evaluate('image("photo.png")', context)).toBe("![[photo.png]]");
     expect(evaluate('icon("star")', context)).toBe(":star:");
   });
+
+  it("extracts path from file objects in link()", () => {
+    expect(evaluate("link(file)", context)).toBe("[[notes/test]]");
+    expect(evaluate('link(file, "Custom")', context)).toBe("[[notes/test|Custom]]");
+  });
+
+  it("extracts basename from file object used as display in link()", () => {
+    expect(evaluate('link("other/page", file)', context)).toBe("[[other/page|test]]");
+  });
+
+  it("handles file object in both arguments of link()", () => {
+    expect(evaluate("link(file, file)", context)).toBe("[[notes/test|test]]");
+  });
+
+  it("extracts path from file objects in image()", () => {
+    expect(evaluate("image(file)", context)).toBe("![[notes/test]]");
+  });
+
+  it("strips .md extension from file object path in link()", () => {
+    const fileWithMd = evaluate('link(file("notes/doc.md"))', context);
+    expect(fileWithMd).toBe("[[notes/doc]]");
+  });
+
+  it("strips .md extension from file object path in image()", () => {
+    const fileWithMd = evaluate('image(file("notes/doc.md"))', context);
+    expect(fileWithMd).toBe("![[notes/doc]]");
+  });
 });
 
 describe("any-target methods", () => {

@@ -1,9 +1,9 @@
 import { createRequire } from 'module';
-import { BasesBody_default, resolveBasesEntries, registerBuiltinViews, i18n, ViewSelector } from './chunk-JIBTBRXE.js';
-export { BasesBody_default as BasesBody } from './chunk-JIBTBRXE.js';
+import { BasesBody_default, resolveBasesEntries, registerBuiltinViews, i18n, ViewSelector } from './chunk-ZLHQ7GIF.js';
+export { BasesBody_default as BasesBody } from './chunk-ZLHQ7GIF.js';
 import { registerCustomViews, viewRegistry } from './chunk-2AUMER56.js';
 export { registerCustomViews, viewRegistry } from './chunk-2AUMER56.js';
-export { compile, evaluate, evaluateFilter, resolvePropertyValue } from './chunk-3J3AIKHW.js';
+export { compile, evaluate, evaluateFilter, resolvePropertyValue } from './chunk-L5VSTGMA.js';
 import { __commonJS, __require, __export, __toESM } from './chunk-TDUJOYTU.js';
 import { h as h$1, Fragment, options } from 'preact';
 import { VFile } from 'vfile';
@@ -17813,6 +17813,19 @@ function extractBaseBlock(raw) {
   if (end === -1) return null;
   return lines.slice(start, end).join("\n");
 }
+function normalizeSortEntries(sort) {
+  if (!Array.isArray(sort)) return void 0;
+  const result = [];
+  for (const entry of sort) {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) continue;
+    const rec = entry;
+    const property = typeof rec.property === "string" ? rec.property : typeof rec.column === "string" ? rec.column : void 0;
+    if (!property) continue;
+    const direction = rec.direction === "DESC" ? "DESC" : "ASC";
+    result.push({ property, direction });
+  }
+  return result;
+}
 function normalizeViews(views) {
   if (views === void 0) return void 0;
   if (!Array.isArray(views)) return null;
@@ -17820,6 +17833,10 @@ function normalizeViews(views) {
     if (!view || typeof view !== "object" || Array.isArray(view)) return null;
     const record = view;
     if (typeof record.type !== "string") return null;
+    const sort = normalizeSortEntries(record.sort);
+    if (sort !== void 0) {
+      record.sort = sort;
+    }
     return record;
   }).filter((view) => view !== null);
   return normalized;
@@ -17868,9 +17885,7 @@ var BasesPage = (opts) => ({
       }
       const basesData = parseBasesData(raw);
       if (!basesData) continue;
-      const slug = slugifyFilePath(
-        filePath.replace(/\.base$/, "")
-      );
+      const slug = slugifyFilePath(filePath);
       const fileWithoutExt = filePath.replace(/\.base$/, "");
       const baseName = fileWithoutExt.split("/").pop() ?? "Base";
       const lastSlash = filePath.lastIndexOf("/");
@@ -17936,6 +17951,22 @@ function createBasesCodeblockTransform(opts) {
       const blockIndex = Number(blockIndexStr);
       const basesData = basesBlocks[blockIndex];
       if (!basesData) return;
+      const viewName = node.properties?.["dataQzBasesView"];
+      const fd = componentData.fileData;
+      const selfPath = fd.relativePath ?? fd.filePath ?? slug;
+      const selfName = selfPath.split("/").pop()?.replace(/\.[^.]+$/, "") ?? "";
+      const selfLastSlash = selfPath.lastIndexOf("/");
+      const selfContext = {
+        file: {
+          name: selfName,
+          path: selfPath,
+          folder: selfLastSlash >= 0 ? selfPath.slice(0, selfLastSlash) : "",
+          ext: selfPath.slice(selfPath.lastIndexOf(".") + 1)
+        }
+      };
+      const baseSlugs = new Set(allSlugs.filter((s3) => s3.endsWith(".base")));
+      const baseAliases = new Set([...baseSlugs].map((s3) => s3.replace(/\.base$/, "")));
+      const contentSlugs = allSlugs.filter((s3) => !baseSlugs.has(s3) && !baseAliases.has(s3));
       const htmlString = renderBasesInline(
         basesData,
         allFiles,
@@ -17943,8 +17974,10 @@ function createBasesCodeblockTransform(opts) {
         localeStrings,
         opts,
         slug,
-        allSlugs,
-        linkResolution
+        contentSlugs,
+        linkResolution,
+        viewName,
+        selfContext
       );
       const fragment = fromHtml(htmlString, { fragment: true });
       node.tagName = "div";
@@ -17953,8 +17986,14 @@ function createBasesCodeblockTransform(opts) {
     });
   };
 }
-function renderBasesInline(basesData, allFiles, locale, localeStrings, opts, slug, allSlugs, linkResolution) {
-  const views = basesData.views ?? [];
+function renderBasesInline(basesData, allFiles, locale, localeStrings, opts, slug, allSlugs, linkResolution, viewName, selfContext) {
+  let views = basesData.views ?? [];
+  if (viewName) {
+    views = views.filter((v2) => v2.name === viewName);
+    if (views.length === 0) {
+      return `<div class="bases-empty">View &quot;${viewName}&quot; not found</div>`;
+    }
+  }
   if (views.length === 0) {
     return `<div class="bases-empty">${localeStrings.noViews}</div>`;
   }
@@ -17973,7 +18012,7 @@ function renderBasesInline(basesData, allFiles, locale, localeStrings, opts, slu
     h$1(Fragment, null, ViewSelector({ views, activeIndex: initialIndex, locale }))
   );
   const viewPanels = views.map((view, index2) => {
-    const { entries, total } = resolveBasesEntries(basesData, allFiles, view);
+    const { entries, total } = resolveBasesEntries(basesData, allFiles, view, selfContext);
     const registration = viewRegistry.get(view.type);
     const Renderer = registration?.render;
     const activeClass = index2 === initialIndex ? " is-active" : "";
@@ -18006,26 +18045,55 @@ function renderBasesInline(basesData, allFiles, locale, localeStrings, opts, slu
   const cssBlock = viewCssChunks.length > 0 ? `<style>${viewCssChunks.join("\n")}</style>` : "";
   return `${cssBlock}${selectorHtml}<div class="bases-view-container">${viewPanels.join("")}</div>`;
 }
-
-// src/transformer.ts
 var BasesTransformer = (_opts) => {
   return {
     name: "BasesTransformer",
-    htmlPlugins() {
+    htmlPlugins(ctx) {
+      const baseFileBySlug = buildBaseFileLookup(ctx);
       return [
-        // Plugin 1: Extract embed targets from transclusion blockquotes.
-        // OFM converts ![[...]] embeds to <blockquote class="transclude" data-url="...">.
-        // We collect those URLs and store them on file.data.embeds so the resolver
-        // can populate file.embeds in the EvalContext.
         () => {
           return (tree, file) => {
             const embeds = [];
-            visit(tree, "element", (node) => {
+            visit(tree, "element", (node, index2, parent) => {
+              if (!parent || index2 === void 0) return;
               if (node.tagName !== "blockquote") return;
               const classes = node.properties?.className ?? [];
               if (!classes.includes("transclude")) return;
               const url = node.properties?.dataUrl;
-              if (url) embeds.push(url);
+              if (!url) return;
+              const baseFile = baseFileBySlug.get(url);
+              if (!baseFile) {
+                embeds.push(url);
+                return;
+              }
+              const block = node.properties?.dataBlock ?? "";
+              const viewName = block.startsWith("#") ? block.slice(1) : "";
+              const fullPath = join(ctx.argv.directory, baseFile);
+              let raw;
+              try {
+                raw = readFileSync(fullPath, "utf-8");
+              } catch {
+                embeds.push(url);
+                return;
+              }
+              const basesData = parseBasesData(raw);
+              if (!basesData) {
+                embeds.push(url);
+                return;
+              }
+              if (!file.data.basesBlocks) file.data.basesBlocks = [];
+              const blockIndex = file.data.basesBlocks.length;
+              file.data.basesBlocks.push(basesData);
+              const placeholder = {
+                type: "element",
+                tagName: "div",
+                properties: {
+                  dataQzBasesCodeblock: String(blockIndex),
+                  ...viewName ? { dataQzBasesView: viewName } : {}
+                },
+                children: []
+              };
+              parent.children[index2] = placeholder;
             });
             if (embeds.length > 0) {
               file.data.embeds = embeds;
@@ -18128,6 +18196,26 @@ function extractText(node) {
     }
   }
   return parts.join("");
+}
+function buildBaseFileLookup(ctx) {
+  const lookup = /* @__PURE__ */ new Map();
+  const baseFiles = ctx.allFiles.filter((fp) => fp.endsWith(".base"));
+  for (const fp of baseFiles) {
+    const slug = slugifyFilePath(fp);
+    lookup.set(slug, fp);
+    const fileName = fp.split("/").pop() ?? "";
+    const fileNameSlug = slugifyFilePath(fileName);
+    if (!lookup.has(fileNameSlug)) {
+      lookup.set(fileNameSlug, fp);
+    }
+    const withoutExt = fp.replace(/\.base$/, "");
+    const nameOnly = withoutExt.split("/").pop() ?? "";
+    const nameSlug = slugifyFilePath(nameOnly);
+    if (!lookup.has(nameSlug)) {
+      lookup.set(nameSlug, fp);
+    }
+  }
+  return lookup;
 }
 
 export { BasesPage, BasesTransformer };

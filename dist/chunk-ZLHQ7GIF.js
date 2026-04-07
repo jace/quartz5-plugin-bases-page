@@ -1,6 +1,6 @@
 import { createRequire } from 'module';
 import { viewRegistry, registerCustomViews } from './chunk-2AUMER56.js';
-import { evaluate, evaluateFilter, resolvePropertyValue } from './chunk-3J3AIKHW.js';
+import { evaluate, evaluateFilter, resolvePropertyValue } from './chunk-L5VSTGMA.js';
 import { jsx, jsxs, Fragment } from 'preact/jsx-runtime';
 import { transformLink, slugifyPath } from '@quartz-community/utils';
 
@@ -48,8 +48,8 @@ function toDate(value) {
 function buildFileProperties(fileData, slug, frontmatter) {
   const filePath = getFilePath(fileData, slug);
   const baseName = filePath ? getBaseName(filePath) : getBaseName(slug);
-  const fileName = filePath ? getFileName(filePath) : getFileName(slug);
-  const name = fileName || slug.split("/").pop() || "Untitled";
+  filePath ? getFileName(filePath) : getFileName(slug);
+  const name = baseName || slug.split("/").pop() || "Untitled";
   const basename = baseName || slug.split("/").pop() || "Untitled";
   const lastSlash = filePath.lastIndexOf("/");
   const folder = lastSlash >= 0 ? filePath.slice(0, lastSlash) : "";
@@ -831,7 +831,10 @@ var BasesBody_default = ((opts) => {
     const basesOptions = fileData.basesOptions ?? opts;
     const basesSelfContext = fileData.basesSelfContext;
     const slug = props.fileData.slug ?? "";
-    const allSlugs = props.ctx?.allSlugs ?? [];
+    const rawSlugs = props.ctx?.allSlugs ?? [];
+    const baseSlugs = new Set(rawSlugs.filter((s) => s.endsWith(".base")));
+    const baseAliases = new Set([...baseSlugs].map((s) => s.replace(/\.base$/, "")));
+    const allSlugs = rawSlugs.filter((s) => !baseSlugs.has(s) && !baseAliases.has(s));
     const linkResolution = basesOptions?.linkResolution ?? "shortest";
     if (!basesData) {
       return /* @__PURE__ */ jsx("div", { class: "bases-page bases-empty", children: localeStrings.noData });
@@ -905,5 +908,5 @@ var BasesBody_default = ((opts) => {
 });
 
 export { BasesBody_default, ViewSelector, i18n, registerBuiltinViews, resolveBasesEntries };
-//# sourceMappingURL=chunk-JIBTBRXE.js.map
-//# sourceMappingURL=chunk-JIBTBRXE.js.map
+//# sourceMappingURL=chunk-ZLHQ7GIF.js.map
+//# sourceMappingURL=chunk-ZLHQ7GIF.js.map

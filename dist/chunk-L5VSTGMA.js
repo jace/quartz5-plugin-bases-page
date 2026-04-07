@@ -695,6 +695,27 @@ function isFileValue(value) {
   if (!isRecord(value)) return false;
   return typeof value.name === "string" && typeof value.path === "string" && typeof value.folder === "string" && typeof value.ext === "string" && Array.isArray(value.tags) && Array.isArray(value.links) && typeof value.basename === "string";
 }
+function resolveSelfName(value) {
+  if (!isRecord(value)) return null;
+  if (isRecord(value.file) && typeof value.file.name === "string") {
+    return value.file.name;
+  }
+  if (typeof value.name === "string" && typeof value.path === "string") {
+    return value.basename || value.name;
+  }
+  return null;
+}
+function listContainsName(list, name) {
+  return list.some((item) => {
+    if (typeof item !== "string") return false;
+    const match = item.match(/^\[\[([^\]|]+)(?:\|[^\]]+)?\]\]$/);
+    if (match) {
+      const target = match[1];
+      return target === name || target.endsWith(`/${name}`);
+    }
+    return item === name;
+  });
+}
 function isDateValue(value) {
   return value instanceof Date;
 }
@@ -852,7 +873,11 @@ registerGlobalFunction("if", ([cond, whenTrue, whenFalse]) => {
   return cond ? whenTrue : whenFalse;
 });
 registerGlobalFunction("contains", ([haystack, needle]) => {
-  if (Array.isArray(haystack)) return haystack.includes(needle);
+  if (Array.isArray(haystack)) {
+    if (haystack.includes(needle)) return true;
+    const name = resolveSelfName(needle);
+    return name ? listContainsName(haystack, name) : false;
+  }
   if (typeof haystack === "string") return haystack.includes(toStringValue(needle));
   return false;
 });
@@ -1202,7 +1227,9 @@ registerMethodFunction("string", "asFile", (target, _args, context) => {
 });
 registerMethodFunction("list", "contains", (target, [needle]) => {
   if (!Array.isArray(target)) return false;
-  return target.includes(needle);
+  if (target.includes(needle)) return true;
+  const name = resolveSelfName(needle);
+  return name ? listContainsName(target, name) : false;
 });
 registerMethodFunction("list", "containsAll", (target, args) => {
   if (!Array.isArray(target)) return false;
@@ -1407,6 +1434,7 @@ function getNestedValue2(target, path) {
   return current;
 }
 function resolvePropertyValue(path, context) {
+  if (typeof path !== "string") return void 0;
   const trimmed = path.trim();
   if (!trimmed) return void 0;
   if (trimmed.startsWith("this.")) {
@@ -1707,5 +1735,5 @@ function evaluateFilter(node, context) {
 }
 
 export { compile, evaluate, evaluateFilter, resolvePropertyValue };
-//# sourceMappingURL=chunk-3J3AIKHW.js.map
-//# sourceMappingURL=chunk-3J3AIKHW.js.map
+//# sourceMappingURL=chunk-L5VSTGMA.js.map
+//# sourceMappingURL=chunk-L5VSTGMA.js.map

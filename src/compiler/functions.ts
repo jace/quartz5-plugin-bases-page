@@ -100,9 +100,8 @@ function listContainsName(list: unknown[], name: string): boolean {
   return list.some((item) => {
     if (typeof item !== "string") return false;
     const match = item.match(/^\[\[([^\]|]+)(?:\|[^\]]+)?\]\]$/);
-    if (match) {
-      const target = match[1];
-      return target === name || target.endsWith(`/${name}`);
+    if (match?.[1]) {
+      return match[1] === name || match[1].endsWith(`/${name}`);
     }
     return item === name;
   });

@@ -43,7 +43,6 @@ function buildFileProperties(
 ): BasesEntry["fileProperties"] {
   const filePath = getFilePath(fileData, slug);
   const baseName = filePath ? getBaseName(filePath) : getBaseName(slug);
-  const fileName = filePath ? getFileName(filePath) : getFileName(slug);
   const name = baseName || slug.split("/").pop() || "Untitled";
   const basename = baseName || slug.split("/").pop() || "Untitled";
   const lastSlash = filePath.lastIndexOf("/");

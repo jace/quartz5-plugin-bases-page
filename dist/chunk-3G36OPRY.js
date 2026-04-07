@@ -48,7 +48,6 @@ function toDate(value) {
 function buildFileProperties(fileData, slug, frontmatter) {
   const filePath = getFilePath(fileData, slug);
   const baseName = filePath ? getBaseName(filePath) : getBaseName(slug);
-  filePath ? getFileName(filePath) : getFileName(slug);
   const name = baseName || slug.split("/").pop() || "Untitled";
   const basename = baseName || slug.split("/").pop() || "Untitled";
   const lastSlash = filePath.lastIndexOf("/");
@@ -908,5 +907,5 @@ var BasesBody_default = ((opts) => {
 });
 
 export { BasesBody_default, ViewSelector, i18n, registerBuiltinViews, resolveBasesEntries };
-//# sourceMappingURL=chunk-N3FGEJ3K.js.map
-//# sourceMappingURL=chunk-N3FGEJ3K.js.map
+//# sourceMappingURL=chunk-3G36OPRY.js.map
+//# sourceMappingURL=chunk-3G36OPRY.js.map

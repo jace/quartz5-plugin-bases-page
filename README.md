@@ -18,6 +18,13 @@ plugins:
     enabled: true
 ```
 
+## Interaction with `unlisted` pages
+
+`bases-page` respects the `file.data.unlisted` convention. Pages marked `unlisted: true` (by `@quartz-community/unlisted-pages`, or by `@quartz-community/encrypted-pages` via `unlistWhenEncrypted: true` or per-page `unlisted: true` / `stealth: true`) are excluded from every rendered base view — table, list, board, cards, gallery, and any custom view registered via `viewRegistry`. Both the main entry loop and the internal `fileLookup` used by `.asFile()` method resolution skip unlisted pages, so they cannot be dereferenced from formulas on visible pages either.
+
+> [!note]
+> Base views are **server-side rendered** HTML baked at build time. They do not update client-side after a visitor successfully decrypts an encrypted page. Graph, explorer, and search all re-hydrate from the patched in-memory content index after decryption and show newly-unlocked pages for the rest of the browser session — base views do not, because they were materialized at build time with unlisted pages already excluded. A visitor who decrypts a revealable encrypted page will see it appear in graph, explorer, and search, but **not** in any base view on the site, until the site is rebuilt with that page listed. This is the same structural limitation that applies to backlinks, recent notes, folder listings, and tag listings.
+
 ### TypeScript Override
 
 For advanced use cases (e.g. custom view renderers), you can override in TypeScript:

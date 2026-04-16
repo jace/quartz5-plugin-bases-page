@@ -244,7 +244,7 @@ describe("renderCellValue", () => {
     expect(result.type).toBe("a");
     const href = result.props.href as string;
     expect(href).not.toContain(" ");
-    expect(href).toContain("Arcanist's-Folly");
+    expect(href).toContain("arcanist's-folly");
   });
 
   it("slugifies file paths with multiple spaces and special chars in href", () => {
@@ -268,7 +268,7 @@ describe("renderCellValue", () => {
     expect(result.type).toBe("a");
     const href = result.props.href as string;
     expect(href).not.toContain(" ");
-    expect(href).toContain("Deific-Exaltation");
+    expect(href).toContain("deific-exaltation");
   });
 
   it("slugifies paths with ampersands and percent signs", () => {
@@ -293,17 +293,17 @@ describe("renderCellValue", () => {
     expect(href).not.toContain(" ");
     expect(href).not.toContain("&");
     expect(href).not.toContain("%");
-    expect(href).toContain("Arts--and--Crafts-100-percent");
+    expect(href).toContain("arts--and--crafts-100-percent");
   });
 });
 
 describe("slugifyPath", () => {
   it("replaces spaces with hyphens", () => {
-    expect(slugifyPath("Arcanist's Folly")).toBe("Arcanist's-Folly");
+    expect(slugifyPath("Arcanist's Folly")).toBe("arcanist's-folly");
   });
 
   it("replaces ampersands with -and-", () => {
-    expect(slugifyPath("Arts & Crafts")).toBe("Arts--and--Crafts");
+    expect(slugifyPath("Arts & Crafts")).toBe("arts--and--crafts");
   });
 
   it("replaces percent with -percent", () => {
@@ -311,12 +311,12 @@ describe("slugifyPath", () => {
   });
 
   it("removes question marks and hash signs", () => {
-    expect(slugifyPath("What?#Section")).toBe("WhatSection");
+    expect(slugifyPath("What?#Section")).toBe("whatsection");
   });
 
   it("handles multi-segment paths", () => {
     expect(slugifyPath("Compendium/Species/Ratkin/Deific Exaltation")).toBe(
-      "Compendium/Species/Ratkin/Deific-Exaltation",
+      "compendium/species/ratkin/deific-exaltation",
     );
   });
 
@@ -324,7 +324,7 @@ describe("slugifyPath", () => {
     expect(slugifyPath("folder/")).toBe("folder");
   });
 
-  it("leaves clean paths unchanged", () => {
-    expect(slugifyPath("Compendium/Species/Dryad/Apple")).toBe("Compendium/Species/Dryad/Apple");
+  it("lowercases for case-insensitive matching (Obsidian parity)", () => {
+    expect(slugifyPath("Compendium/Species/Dryad/Apple")).toBe("compendium/species/dryad/apple");
   });
 });

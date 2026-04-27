@@ -75,6 +75,18 @@ const inlineScriptPlugin: Plugin = {
   },
 };
 
+const SINGLETON_EXTERNALS = [
+  "preact",
+  "preact/hooks",
+  "preact/jsx-runtime",
+  "preact/compat",
+  "@jackyzha0/quartz",
+  "@jackyzha0/quartz/*",
+  "vfile",
+  "vfile/*",
+  "unified",
+];
+
 export default defineConfig({
   entry: {
     index: "src/index.ts",
@@ -91,6 +103,8 @@ export default defineConfig({
   treeshake: true,
   target: "es2022",
   splitting: true,
+  noExternal: [/.*/],
+  external: SINGLETON_EXTERNALS,
   outDir: "dist",
   platform: "node",
   banner: {

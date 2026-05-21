@@ -185,7 +185,7 @@ describe("renderCellValue", () => {
       children?: unknown[];
     };
     expect(result.type).toBe("a");
-    expect(result.props.class).toBe("internal");
+    expect(result.props.class).toBe("internal internal-link");
     expect(typeof result.props.href).toBe("string");
   });
 

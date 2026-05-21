@@ -50,7 +50,7 @@ const ListView: ViewRenderer = ({
               primaryColumn === "file.name" ? (
                 <a
                   href={transformLink(slug as FullSlug, entry.slug, transformOpts)}
-                  class="internal"
+                  class="internal internal-link"
                   data-slug={entry.slug}
                 >
                   {entry.title}

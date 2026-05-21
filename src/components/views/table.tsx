@@ -65,7 +65,7 @@ function renderRow(
             {isPrimary ? (
               <a
                 href={transformLink(slug as FullSlug, entry.slug, transformOpts)}
-                class="internal"
+                class="internal internal-link"
                 data-slug={entry.slug}
               >
                 {display || entry.title}

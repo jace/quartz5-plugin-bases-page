@@ -75,7 +75,7 @@ export function renderCellValue(value: unknown, ctx: RenderCtx): ComponentChild 
         },
       );
       return (
-        <a href={href} class="internal">
+        <a href={href} class="internal internal-link">
           {value.basename}
         </a>
       );

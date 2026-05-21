@@ -96,7 +96,7 @@ const CardsView: ViewRenderer = ({
               : undefined;
           const href = transformLink(slug as FullSlug, entry.slug, transformOpts);
           return (
-            <a href={href} class="internal bases-card" data-slug={entry.slug}>
+            <a href={href} class="internal internal-link bases-card" data-slug={entry.slug}>
               {imageSrc && !isColor && (
                 <div class="bases-card-image" style={imageAspect}>
                   <img

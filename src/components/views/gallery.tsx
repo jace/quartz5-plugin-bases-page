@@ -63,7 +63,7 @@ const GalleryView: ViewRenderer = ({
               <div class="bases-gallery-title">
                 <a
                   href={transformLink(slug as FullSlug, entry.slug, transformOpts)}
-                  class="internal"
+                  class="internal internal-link"
                   data-slug={entry.slug}
                 >
                   {entry.title}

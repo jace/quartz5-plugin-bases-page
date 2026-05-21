@@ -73,7 +73,7 @@ const BoardView: ViewRenderer = ({
                   <div class="bases-board-card">
                     <a
                       href={transformLink(slug as FullSlug, entry.slug, transformOpts)}
-                      class="internal"
+                      class="internal internal-link"
                       data-slug={entry.slug}
                     >
                       {entry.title}

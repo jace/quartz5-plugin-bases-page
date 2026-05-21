@@ -27,7 +27,7 @@ export function renderTextWithLinks(text: string, ctx: RenderCtx): ComponentChil
       start: match.index ?? 0,
       end: (match.index ?? 0) + match[0].length,
       node: (
-        <a href={href} class="internal">
+        <a href={href} class="internal internal-link">
           {display}
         </a>
       ),
@@ -51,7 +51,7 @@ export function renderTextWithLinks(text: string, ctx: RenderCtx): ComponentChil
       node: (
         <a
           href={resolvedHref}
-          class={isExternal ? "external" : "internal"}
+          class={isExternal ? "external external-link" : "internal internal-link"}
           {...(isExternal ? { target: "_blank", rel: "noopener noreferrer" } : {})}
         >
           {display || href}
@@ -69,7 +69,7 @@ export function renderTextWithLinks(text: string, ctx: RenderCtx): ComponentChil
       start,
       end,
       node: (
-        <a href={match[0]} class="external" target="_blank" rel="noopener noreferrer">
+        <a href={match[0]} class="external external-link" target="_blank" rel="noopener noreferrer">
           {match[0]}
         </a>
       ),

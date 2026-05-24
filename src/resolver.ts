@@ -85,7 +85,16 @@ function compareSort(a: unknown, b: unknown): number {
 }
 
 function buildSortKeys(view?: BasesView): SortEntry[] {
-  if (view?.sort && view.sort.length > 0) return view.sort;
+  if (view?.sort && view.sort.length > 0) {
+    // When groupBy is active, strip the groupBy property from sort keys.
+    // Obsidian applies sort within each group, not globally. Group ordering
+    // is handled separately by the view renderer using groupBy.direction.
+    if (view.groupBy?.property) {
+      const filtered = view.sort.filter((s) => s.property !== view.groupBy!.property);
+      if (filtered.length > 0) return filtered;
+    }
+    return view.sort;
+  }
   if (view?.groupBy?.property) {
     return [{ property: view.groupBy.property, direction: view.groupBy.direction ?? "ASC" }];
   }

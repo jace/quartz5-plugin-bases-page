@@ -100,7 +100,7 @@
     gap: 4px;
   }
 
-  td input[type=checkbox] {
+  td input[type="checkbox"] {
     margin-inline: 0;
   }
 }
@@ -108,6 +108,7 @@
 .bases-table-header-sort {
   position: absolute;
   right: 8px;
+  top: calc(50% - 4px);
   display: inline-block;
   width: 8px;
   height: 8px;

@@ -23,6 +23,18 @@ function sortTable(table, columnIndex, direction) {
   const body = table.querySelector("tbody");
   if (!body) return;
   const rows = Array.from(body.querySelectorAll("tr"));
+  if (direction === "none") {
+    const original = table._originalOrder;
+    if (original) {
+      original.forEach((row) => {
+        body.appendChild(row);
+      });
+    }
+    return;
+  }
+  if (!table._originalOrder) {
+    table._originalOrder = Array.from(rows);
+  }
   rows.sort((rowA, rowB) => {
     const cellA = rowA.children[columnIndex];
     const cellB = rowB.children[columnIndex];
@@ -43,7 +55,7 @@ function initTables(page, cleanupFns) {
     headers.forEach((header, index) => {
       const handler = () => {
         const current = header.dataset.sortDirection || "none";
-        const next = current === "asc" ? "desc" : "asc";
+        const next = current === "asc" ? "desc" : current === "desc" ? "none" : "asc";
         headers.forEach((th) => {
           if (th !== header) th.dataset.sortDirection = "none";
           th.classList.remove("is-sorted-asc", "is-sorted-desc");

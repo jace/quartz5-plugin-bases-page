@@ -363,13 +363,13 @@ registerMethodFunction("file", "hasTag", (target, args) => {
   if (!isFileValue(target)) return false;
   if (args.length === 0) return false;
   return args.every((tag) => {
-    const value = toStringValue(tag);
+    const value = toStringValue(tag)?.toLowerCase();
     if (!value) return false;
-    // Exact match
-    if (target.tags.includes(value)) return true;
-    // Nested tag matching: hasTag("work") matches "work/project"
     const prefix = value.endsWith("/") ? value : `${value}/`;
-    return target.tags.some((t) => t.startsWith(prefix));
+    return target.tags.some((t) => {
+      const lower = t.toLowerCase();
+      return lower === value || lower.startsWith(prefix);
+    });
   });
 });
 

@@ -19,22 +19,8 @@ function compareValues(a, b) {
   return String(a).localeCompare(String(b));
 }
 
-function sortTable(table, columnIndex, direction) {
-  const body = table.querySelector("tbody");
-  if (!body) return;
-  const rows = Array.from(body.querySelectorAll("tr"));
-  if (direction === "none") {
-    const original = table._originalOrder;
-    if (original) {
-      original.forEach((row) => {
-        body.appendChild(row);
-      });
-    }
-    return;
-  }
-  if (!table._originalOrder) {
-    table._originalOrder = Array.from(rows);
-  }
+function sortDataRows(rows, columnIndex, direction) {
+  if (rows.length === 0) return rows;
   rows.sort((rowA, rowB) => {
     const cellA = rowA.children[columnIndex];
     const cellB = rowB.children[columnIndex];
@@ -43,9 +29,49 @@ function sortTable(table, columnIndex, direction) {
     return compareValues(valueA, valueB);
   });
   if (direction === "desc") rows.reverse();
-  rows.forEach((row) => {
-    body.appendChild(row);
-  });
+  return rows;
+}
+
+function sortTable(table, columnIndex, direction) {
+  const body = table.querySelector("tbody");
+  if (!body) return;
+  const allRows = Array.from(body.querySelectorAll("tr"));
+  if (direction === "none") {
+    const original = table._originalOrder;
+    if (original) {
+      original.forEach((row) => body.appendChild(row));
+    }
+    return;
+  }
+  if (!table._originalOrder) {
+    table._originalOrder = Array.from(allRows);
+  }
+  const hasGroups = allRows.some((row) => row.classList.contains("bases-table-group-header"));
+  if (hasGroups) {
+    const groups = [];
+    let currentGroup = null;
+    for (const row of allRows) {
+      if (row.classList.contains("bases-table-group-header")) {
+        currentGroup = { header: row, rows: [] };
+        groups.push(currentGroup);
+      } else if (currentGroup) {
+        currentGroup.rows.push(row);
+      } else {
+        currentGroup = { header: null, rows: [row] };
+        groups.push(currentGroup);
+      }
+    }
+    for (const group of groups) {
+      sortDataRows(group.rows, columnIndex, direction);
+    }
+    for (const group of groups) {
+      if (group.header) body.appendChild(group.header);
+      group.rows.forEach((row) => body.appendChild(row));
+    }
+  } else {
+    sortDataRows(allRows, columnIndex, direction);
+    allRows.forEach((row) => body.appendChild(row));
+  }
 }
 
 function initTables(page, cleanupFns) {

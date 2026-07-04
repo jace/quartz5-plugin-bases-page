@@ -80,6 +80,48 @@ describe("getColumnLabel", () => {
     const basesData: BasesData = {};
     expect(getColumnLabel("priority", basesData)).toBe("Priority");
   });
+
+  it("resolves a bare column to its note.* config key", () => {
+    // A view's `order` uses the bare name `osm`, but the base keys the property
+    // as `note.osm` — the label lookup must resolve the shorthand.
+    const basesData: BasesData = {
+      properties: { "note.osm": { displayName: "OSM" } },
+    };
+    expect(getColumnLabel("osm", basesData)).toBe("OSM");
+  });
+
+  it("resolves a hyphenated bare column to note.*", () => {
+    const basesData: BasesData = {
+      properties: { "note.last-modified": { displayName: "Last modified" } },
+    };
+    expect(getColumnLabel("last-modified", basesData)).toBe("Last modified");
+  });
+
+  it("matches file.* and note.* prefixed columns directly", () => {
+    const basesData: BasesData = {
+      properties: {
+        "file.name": { displayName: "Page" },
+        "note.osm": { displayName: "OSM" },
+      },
+    };
+    expect(getColumnLabel("file.name", basesData)).toBe("Page");
+    expect(getColumnLabel("note.osm", basesData)).toBe("OSM");
+  });
+
+  it("prefers a direct key over the note.* fallback", () => {
+    const basesData: BasesData = {
+      properties: {
+        status: { displayName: "Direct" },
+        "note.status": { displayName: "Prefixed" },
+      },
+    };
+    expect(getColumnLabel("status", basesData)).toBe("Direct");
+  });
+
+  it("falls back to capitalization when the resolved config has no displayName", () => {
+    const basesData: BasesData = { properties: { "note.osm": {} } };
+    expect(getColumnLabel("osm", basesData)).toBe("Osm");
+  });
 });
 
 describe("resolveEntryPropertyValue", () => {

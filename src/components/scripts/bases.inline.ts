@@ -97,20 +97,56 @@ function initTables(page, cleanupFns) {
   });
 }
 
+function currentHashSlug() {
+  try {
+    return decodeURIComponent((window.location.hash || "").replace(/^#/, "")).toLowerCase();
+  } catch (e) {
+    return (window.location.hash || "").replace(/^#/, "").toLowerCase();
+  }
+}
+
+// Index of the tab whose slug matches the URL fragment, or -1 if none.
+function viewIndexForHash(tabs) {
+  const slug = currentHashSlug();
+  if (!slug) return -1;
+  for (const tab of tabs) {
+    if (tab.dataset.viewSlug === slug) {
+      const index = parseInt(tab.dataset.viewIndex || "0", 10);
+      return Number.isNaN(index) ? -1 : index;
+    }
+  }
+  return -1;
+}
+
 function initTabs(page, cleanupFns) {
   const tabs = page.querySelectorAll(".bases-view-tabs button");
   if (tabs.length === 0) return;
-  const initial = parseInt(page.dataset.initialView || "0", 10);
-  setActiveView(page, Number.isNaN(initial) ? 0 : initial);
+
+  // A matching `#slug` deep-link wins over the configured default view.
+  const fallback = parseInt(page.dataset.initialView || "0", 10);
+  const fromHash = viewIndexForHash(tabs);
+  setActiveView(page, fromHash >= 0 ? fromHash : Number.isNaN(fallback) ? 0 : fallback);
 
   tabs.forEach((tab) => {
     const handler = () => {
       const index = parseInt(tab.dataset.viewIndex || "0", 10);
       setActiveView(page, Number.isNaN(index) ? 0 : index);
+      // Reflect the active tab in the URL so it can be shared/bookmarked,
+      // without adding a history entry per tab click.
+      const slug = tab.dataset.viewSlug;
+      if (slug) window.history.replaceState(null, "", "#" + slug);
     };
     tab.addEventListener("click", handler);
     cleanupFns.push(() => tab.removeEventListener("click", handler));
   });
+
+  // Keep the view in sync with back/forward navigation and manual hash edits.
+  const onHashChange = () => {
+    const index = viewIndexForHash(tabs);
+    if (index >= 0) setActiveView(page, index);
+  };
+  window.addEventListener("hashchange", onHashChange);
+  cleanupFns.push(() => window.removeEventListener("hashchange", onHashChange));
 }
 
 function initBases() {

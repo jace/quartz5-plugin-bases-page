@@ -90,6 +90,7 @@
     "github-slugger": "^2.0.0",
     "hast-util-from-html": "^2.0.3",
     "hast-util-to-jsx-runtime": "^2.3.6",
+    "jsdom": "^29.1.1",
     "preact": "^10.28.2",
     "preact-render-to-string": "^6.6.6",
     "prettier": "^3.6.2",

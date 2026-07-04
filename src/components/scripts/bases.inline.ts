@@ -106,7 +106,10 @@ function currentHashSlug() {
 }
 
 // Index of the tab whose slug matches the URL fragment, or -1 if none.
-function viewIndexForHash(tabs) {
+// NOTE: viewIndexForHash and initTabs are exported for unit tests. The tsup
+// inline-script loader strips `export` before bundling, so the shipped browser
+// script is byte-identical — these are plain in-scope functions at runtime.
+export function viewIndexForHash(tabs) {
   const slug = currentHashSlug();
   if (!slug) return -1;
   for (const tab of tabs) {
@@ -118,7 +121,7 @@ function viewIndexForHash(tabs) {
   return -1;
 }
 
-function initTabs(page, cleanupFns) {
+export function initTabs(page, cleanupFns) {
   const tabs = page.querySelectorAll(".bases-view-tabs button");
   if (tabs.length === 0) return;
 

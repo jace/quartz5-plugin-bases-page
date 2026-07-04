@@ -332,8 +332,15 @@ function isEmptyValue(value) {
   if (Array.isArray(value)) return value.length === 0;
   return false;
 }
+function getPropertyConfig(column, basesData) {
+  const props = basesData.properties;
+  if (!props) return void 0;
+  if (props[column]) return props[column];
+  if (!/^(note|file|formula)\./.test(column)) return props["note." + column];
+  return void 0;
+}
 function getColumnLabel(column, basesData) {
-  const config = basesData.properties?.[column];
+  const config = getPropertyConfig(column, basesData);
   if (config?.displayName) return config.displayName;
   const segment = column.split(".").pop() ?? column;
   return segment.split("_").map((part) => part ? part.charAt(0).toUpperCase() + part.slice(1) : part).join(" ");
@@ -930,5 +937,5 @@ var BasesBody_default = ((opts) => {
 });
 
 export { BasesBody_default, ViewSelector, i18n, registerBuiltinViews, resolveBasesEntries };
-//# sourceMappingURL=chunk-R6ENINIZ.js.map
-//# sourceMappingURL=chunk-R6ENINIZ.js.map
+//# sourceMappingURL=chunk-UCQTK6NS.js.map
+//# sourceMappingURL=chunk-UCQTK6NS.js.map

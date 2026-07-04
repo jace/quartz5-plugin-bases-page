@@ -92,8 +92,20 @@ export function isEmptyValue(value: unknown): boolean {
   return false;
 }
 
+// Resolve a column reference to its configured property entry. A column in
+// `view.order` may be a bare frontmatter name (`osm`) while the base's
+// `properties` map keys it as `note.osm` — so mirror how values resolve
+// (resolveEntryPropertyValue): an unprefixed column is shorthand for note.*.
+function getPropertyConfig(column: string, basesData: BasesData) {
+  const props = basesData.properties;
+  if (!props) return undefined;
+  if (props[column]) return props[column];
+  if (!/^(note|file|formula)\./.test(column)) return props["note." + column];
+  return undefined;
+}
+
 export function getColumnLabel(column: string, basesData: BasesData): string {
-  const config = basesData.properties?.[column];
+  const config = getPropertyConfig(column, basesData);
   if (config?.displayName) return config.displayName;
   const segment = column.split(".").pop() ?? column;
   return segment

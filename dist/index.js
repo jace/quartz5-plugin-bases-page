@@ -20123,11 +20123,18 @@ var BasesPage = (opts) => ({
           ext: ext2
         }
       };
+      const unlisted = basesData.unlisted === true;
+      const frontmatter = {
+        title: baseName,
+        tags: []
+      };
+      if (unlisted) frontmatter.unlisted = true;
       virtualPages.push({
         slug,
         title: baseName,
         data: {
-          frontmatter: { title: baseName, tags: [] },
+          frontmatter,
+          ...unlisted ? { unlisted: true } : {},
           links: resolveBasesEntries(
             basesData,
             allFileData,

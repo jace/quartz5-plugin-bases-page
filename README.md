@@ -29,6 +29,22 @@ A `.base` file that matches Quartz's `configuration.ignorePatterns` is **not emi
 > [!note]
 > Base views are **server-side rendered** HTML baked at build time. They do not update client-side after a visitor successfully decrypts an encrypted page. Graph, explorer, and search all re-hydrate from the patched in-memory content index after decryption and show newly-unlocked pages for the rest of the browser session — base views do not, because they were materialized at build time with unlisted pages already excluded. A visitor who decrypts a revealable encrypted page will see it appear in graph, explorer, and search, but **not** in any base view on the site, until the site is rebuilt with that page listed. This is the same structural limitation that applies to backlinks, recent notes, folder listings, and tag listings.
 
+### Unlisting the base page itself
+
+The above is about the **rows** a base lists. To unlist the **generated base page itself** — emit it (reachable by direct URL) but keep it out of the content index, search, sitemap, RSS, explorer, graph, backlinks and folder/tag listings — add a top-level `unlisted: true` to the `.base` file:
+
+```yaml
+unlisted: true
+filters:
+  and:
+    - file.hasTag("place")
+views:
+  - type: table
+    name: Table
+```
+
+Because base pages are generated virtual pages, they never pass through the markdown pipeline, so the `@quartz-community/unlisted-pages` rehype transformer cannot bridge `frontmatter.unlisted → file.data.unlisted` for them. `generate` therefore sets both `frontmatter.unlisted` and `file.data.unlisted` directly, so the standard `file.data.unlisted` convention takes effect. Useful for a register that should be shareable by link but not advertised across the public site.
+
 ### TypeScript Override
 
 For advanced use cases (e.g. custom view renderers), you can override in TypeScript:

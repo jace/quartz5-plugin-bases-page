@@ -77,11 +77,23 @@ export const BasesPage: QuartzPageTypePlugin<BasesPageOptions> = (opts) => ({
         },
       };
 
+      // `unlisted: true` in the .base YAML → emit the page but keep it off every
+      // discovery surface. Virtual pages skip the markdown pipeline, so the
+      // `unlisted-pages` rehype transformer never copies frontmatter → data.unlisted
+      // for us; set both here directly (consumers read `file.data.unlisted`).
+      const unlisted = basesData.unlisted === true;
+      const frontmatter: { title: string; tags: string[]; unlisted?: boolean } = {
+        title: baseName,
+        tags: [],
+      };
+      if (unlisted) frontmatter.unlisted = true;
+
       virtualPages.push({
         slug,
         title: baseName,
         data: {
-          frontmatter: { title: baseName, tags: [] },
+          frontmatter,
+          ...(unlisted ? { unlisted: true } : {}),
           links: resolveBasesEntries(
             basesData,
             allFileData,

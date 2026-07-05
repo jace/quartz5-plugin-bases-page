@@ -72,3 +72,37 @@ describe("BasesPage.generate — ignorePatterns apply to bases", () => {
     expect(plugin.generate({ content: [], ctx })).toHaveLength(1);
   });
 });
+
+describe("BasesPage.generate — unlisted", () => {
+  // write a base with an explicit `unlisted:` value alongside the views block
+  function tmpUnlisted(rel: string, value: boolean | undefined): string {
+    const dir = fs.mkdtempSync(path.join(os.tmpdir(), "basespage-"));
+    dirs.push(dir);
+    const abs = path.join(dir, rel);
+    fs.mkdirSync(path.dirname(abs), { recursive: true });
+    const head = value === undefined ? "" : `unlisted: ${value}\n`;
+    fs.writeFileSync(abs, `${head}views:\n  - type: table\n    name: Table\n`);
+    return dir;
+  }
+
+  it("marks the page unlisted (frontmatter + data) when unlisted: true", () => {
+    const dir = tmpUnlisted("Members.base", true);
+    const [page] = generate(dir, ["Members.base"]);
+    expect(page.data.unlisted).toBe(true);
+    expect(page.data.frontmatter.unlisted).toBe(true);
+  });
+
+  it("leaves the page listed when unlisted is absent", () => {
+    const dir = tmpUnlisted("Members.base", undefined);
+    const [page] = generate(dir, ["Members.base"]);
+    expect(page.data.unlisted).toBeUndefined();
+    expect(page.data.frontmatter.unlisted).toBeUndefined();
+  });
+
+  it("leaves the page listed when unlisted: false", () => {
+    const dir = tmpUnlisted("Members.base", false);
+    const [page] = generate(dir, ["Members.base"]);
+    expect(page.data.unlisted).toBeUndefined();
+    expect(page.data.frontmatter.unlisted).toBeUndefined();
+  });
+});

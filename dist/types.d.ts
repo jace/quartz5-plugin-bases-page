@@ -149,6 +149,15 @@ interface BasesData {
     summaries?: Record<string, string>;
     /** View definitions — each entry defines one tab/view */
     views?: BasesView[];
+    /**
+     * When true, the generated base page is emitted (accessible by direct URL) but
+     * marked `unlisted` — hidden from the content index, search, sitemap, RSS,
+     * explorer, graph, backlinks and folder/tag listings (the `file.data.unlisted`
+     * convention). Virtual pages skip the markdown pipeline, so the
+     * `unlisted-pages` rehype transformer never runs on them; `generate()` sets the
+     * flag directly instead.
+     */
+    unlisted?: boolean;
 }
 /** Resolved entry — a single note that matched the base query */
 interface BasesEntry {

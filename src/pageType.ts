@@ -9,6 +9,7 @@ import type {
 } from "@quartz-community/types";
 import type { Root as HtmlRoot, Element, ElementContent } from "hast";
 import { visit } from "unist-util-visit";
+import { minimatch } from "minimatch";
 import { render } from "preact-render-to-string";
 import { h, Fragment } from "preact";
 import { fromHtml } from "hast-util-from-html";
@@ -36,7 +37,14 @@ export const BasesPage: QuartzPageTypePlugin<BasesPageOptions> = (opts) => ({
   fileExtensions: [".base"],
   match: basesMatcher,
   generate({ content, ctx }) {
-    const baseFiles = ctx.allFiles.filter((fp) => fp.endsWith(".base"));
+    // Apply Quartz's `ignorePatterns` to `.base` files too, so an ignored base
+    // is not emitted as a page. `ctx.allFiles` was globbed with the *static*
+    // config patterns at load time, but plugins (e.g. the `.pubignore` filter)
+    // may append patterns during the build — so re-check here, mirroring
+    // Quartz's own `ignored()` (minimatch per pattern).
+    const ignorePatterns = ctx.cfg.configuration.ignorePatterns ?? [];
+    const isIgnored = (fp: string) => ignorePatterns.some((p) => minimatch(fp, p));
+    const baseFiles = ctx.allFiles.filter((fp) => fp.endsWith(".base") && !isIgnored(fp));
     const allFileData = content.map((c) => c[1].data);
     const virtualPages: VirtualPage[] = [];
 
